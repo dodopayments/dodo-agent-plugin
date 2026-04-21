@@ -1,0 +1,41 @@
+{
+    "name": "dodopayments",
+    "version": "0.1.0",
+    "description": "Dodo Payments tools for Claude Code, including integration agent skills and the Dodo Payments API and docs MCP servers.",
+    "author": {
+        "name": "Dodo Payments",
+        "email": "support@dodopayments.com"
+    },
+    "homepage": "https://docs.dodopayments.com/developer-resources/agent-skills",
+    "repository": "https://github.com/dodopayments/dodo-claude-plugin",
+    "license": "MIT",
+    "keywords": [
+        "dodopayments",
+        "payments",
+        "billing",
+        "subscriptions",
+        "claude-code",
+        "mcp",
+        "skills"
+    ],
+    "userConfig": {
+        "dodo_api_key": {
+            "type": "string",
+            "title": "Dodo Payments API Key",
+            "description": "Optional. Only required if you switch the API MCP server in .mcp.json to local stdio mode (dodopayments-mcp). The default remote SSE server authenticates via OAuth in your browser.",
+            "sensitive": true
+        },
+        "dodo_webhook_key": {
+            "type": "string",
+            "title": "Dodo Payments Webhook Key",
+            "description": "Optional. Only required for local stdio MCP mode. Obtain from Dashboard > Developer > Webhooks.",
+            "sensitive": true
+        },
+        "dodo_environment": {
+            "type": "string",
+            "title": "Environment",
+            "description": "Either test_mode or live_mode. Only used by the local stdio MCP server.",
+            "sensitive": false
+        }
+    }
+}
