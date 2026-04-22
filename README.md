@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/github/license/dodopayments/dodo-claude-plugin.svg?style=flat-square)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg?style=flat-square)](./CHANGELOG.md)
-[![Discord](https://img.shields.io/discord/1305513669995528234?label=discord&style=flat-square)](https://discord.gg/bYqAp4ayYh)
+[![Discord](https://img.shields.io/discord/1305511580854779984?label=discord&style=flat-square)](https://discord.gg/bYqAp4ayYh)
 
 The official Dodo Payments plugin for Claude Code. Installs agent skills and MCP servers in one step so Claude Code can build against Dodo Payments with up-to-date SDK patterns and live access to your account.
 
