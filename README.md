@@ -1,60 +1,91 @@
-# Dodo Payments Claude Code Plugin
+# Dodo Payments Agent Plugin
 
-[![License](https://img.shields.io/github/license/dodopayments/dodo-claude-plugin.svg?style=flat-square)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg?style=flat-square)](./CHANGELOG.md)
+[![License](https://img.shields.io/github/license/dodopayments/dodo-agent-plugin.svg?style=flat-square)](./LICENSE)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg?style=flat-square)](./CHANGELOG.md)
+[![npm](https://img.shields.io/npm/v/@dodopayments/opencode-plugin.svg?style=flat-square)](https://www.npmjs.com/package/@dodopayments/opencode-plugin)
 [![Discord](https://img.shields.io/discord/1305511580854779984?label=discord&style=flat-square)](https://discord.gg/bYqAp4ayYh)
 
-The official Dodo Payments plugin for Claude Code. Installs agent skills and MCP servers in one step so Claude Code can build against Dodo Payments with up-to-date SDK patterns and live access to your account.
+> **Renamed from `dodo-claude-plugin` in v0.2.0.** The old GitHub URL redirects to the new one; see [CHANGELOG](./CHANGELOG.md#020) for migration notes.
+
+The official Dodo Payments plugin for AI coding agents. Installs eight integration skills and two MCP servers across **Claude Code**, **Codex CLI**, **Cursor**, and **OpenCode** from a single source of truth.
 
 ## What you get
 
-The plugin ships three things in a single install:
+- **Dodo Payments API MCP server** - Live API access (payments, subscriptions, customers, products, refunds, licenses, usage). Authenticates via browser OAuth, no local credentials required.
+- **Dodo Knowledge MCP server** - No credentials. Semantic search over the current Dodo Payments documentation.
+- **Eight agent skills** - Written as `SKILL.md` files with YAML frontmatter. Your agent loads the relevant skill on its own when a task calls for it.
 
-- **The Dodo Payments API MCP server** - Pre-registered with Claude Code. Uses the remote SSE endpoint (`mcp.dodopayments.com/sse`) so you authenticate through your browser - no local credentials required.
-- **The Dodo Knowledge MCP server** - No credentials required. Your agent can look up Dodo Payments' current documentation as it works, rather than relying on what the model was trained on.
-- **Eight agent skills** - Written as Markdown files that teach Claude Code how to integrate Dodo Payments correctly. Claude Code loads the relevant skill on its own when a task calls for it.
+## Install
 
-## Structure
+### Claude Code
 
+```bash
+claude plugins marketplace add dodopayments/dodo-agent-plugin
+claude plugins install dodopayments@dodopayments
 ```
-.claude-plugin/
-├── plugin.json              # Plugin manifest and user config schema
-└── marketplace.json         # Marketplace manifest for install-by-name flows
-skills/                      # Flattened symlinks to the skills submodule
-├── best-practices/
-│   └── SKILL.md
-├── checkout-integration/
-│   └── SKILL.md
-├── subscription-integration/
-│   └── SKILL.md
-├── webhook-integration/
-│   └── SKILL.md
-├── usage-based-billing/
-│   └── SKILL.md
-├── credit-based-billing/
-│   └── SKILL.md
-├── license-keys/
-│   └── SKILL.md
-├── billing-sdk/
-│   └── SKILL.md
-skills-src/                  # Git submodule: dodopayments/skills
-.mcp.json                    # Dodo Payments API and docs MCP servers
+
+The API MCP server uses browser OAuth by default, so no keys are required at install time. The first time your agent calls a Dodo tool, you'll be prompted to sign in.
+
+### Codex CLI
+
+Codex reads `.claude-plugin/marketplace.json` natively, so the same repo works:
+
+```bash
+codex plugin marketplace add dodopayments/dodo-agent-plugin
+codex plugin install dodopayments@dodopayments
 ```
+
+### Cursor
+
+Manual install (pending Cursor marketplace listing):
+
+```bash
+git clone https://github.com/dodopayments/dodo-agent-plugin.git ~/.cursor/plugins/local/dodo-agent-plugin
+```
+
+Restart Cursor. The plugin loads skills from `.claude/skills/` (via Cursor's Claude Code compat) and MCP servers from `.mcp.json`.
+
+To submit the plugin to Cursor's official marketplace, point [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish) at the GitHub repo.
+
+### OpenCode
+
+OpenCode distributes via npm. Add to your `opencode.json`:
+
+```jsonc
+{
+    "$schema": "https://opencode.ai/config.json",
+    "plugin": ["@dodopayments/opencode-plugin"],
+    "mcp": {
+        "dodopayments-api": {
+            "type": "local",
+            "command": ["npx", "-y", "mcp-remote@latest", "https://mcp.dodopayments.com/sse"],
+            "enabled": true
+        },
+        "dodo-knowledge": {
+            "type": "local",
+            "command": ["npx", "-y", "mcp-remote@latest", "https://knowledge.dodopayments.com/mcp"],
+            "enabled": true
+        }
+    }
+}
+```
+
+OpenCode auto-discovers the eight skills from the installed package. Restart OpenCode to pick up the new config.
 
 ## Included Skills
 
 | Skill | Description |
 |-------|-------------|
-| `/dodopayments:best-practices` | Comprehensive guide to integrating Dodo Payments with best practices |
-| `/dodopayments:checkout-integration` | Creating checkout sessions and payment flows |
-| `/dodopayments:subscription-integration` | Implementing subscription billing flows |
-| `/dodopayments:webhook-integration` | Setting up and handling webhooks for payment events |
-| `/dodopayments:usage-based-billing` | Implementing metered billing with events and meters |
-| `/dodopayments:credit-based-billing` | Credit entitlements, balances, and metered credit deduction |
-| `/dodopayments:license-keys` | Managing license keys for digital products |
-| `/dodopayments:billing-sdk` | Using BillingSDK React components |
+| `best-practices` | Comprehensive guide to integrating Dodo Payments with best practices |
+| `checkout-integration` | Creating checkout sessions and payment flows |
+| `subscription-integration` | Implementing subscription billing flows |
+| `webhook-integration` | Setting up and handling webhooks for payment events |
+| `usage-based-billing` | Implementing metered billing with events and meters |
+| `credit-based-billing` | Credit entitlements, balances, and metered credit deduction |
+| `license-keys` | Managing license keys for digital products |
+| `billing-sdk` | Using BillingSDK React components |
 
-Skills source: [`dodopayments/skills`](https://github.com/dodopayments/skills).
+Skills source: [`dodopayments/skills`](https://github.com/dodopayments/skills) (bundled as a git submodule in `skills-src/`).
 
 ## Included MCP Servers
 
@@ -65,20 +96,9 @@ Skills source: [`dodopayments/skills`](https://github.com/dodopayments/skills).
 
 Both servers are wired through `mcp-remote` so they run in any MCP-compatible client.
 
-## Install
+## Configure (optional, Claude Code)
 
-In your terminal, run:
-
-```bash
-claude plugins marketplace add dodopayments/dodo-claude-plugin
-claude plugins install dodopayments@dodopayments
-```
-
-The API MCP server uses browser-based OAuth by default, so no keys are required at install time. The first time your agent calls a Dodo tool, you'll be prompted to sign in.
-
-## Configure (optional)
-
-If you prefer to run the API MCP locally with an API key instead of the remote SSE server, open `/plugins` in Claude Code, go to the **Installed** tab, select **Dodo Payments**, and choose **Configure options**. Fill in:
+If you prefer to run the API MCP locally with an API key instead of the remote SSE server, open `/plugins` in Claude Code, select **Dodo Payments**, and choose **Configure options**. Fill in:
 
 - `dodo_api_key` - your `dodo_test_...` or `dodo_live_...` key
 - `dodo_webhook_key` - your webhook signing secret
@@ -107,24 +127,24 @@ Run `/reload-plugins` to apply changes to your current session.
 
 ## A prompt to try first
 
-Once the plugin is active, try a prompt like:
+Once the plugin is active, try:
 
 ```
 Set up Dodo Payments webhook handlers in my Next.js app for payment.succeeded and subscription.active events.
 ```
 
-Claude Code will load the `webhook-integration` skill, use the `dodo-knowledge` MCP to pull the latest payload shapes, and write a handler with signature verification following the Standard Webhooks spec.
+Your agent will load the `webhook-integration` skill, use the `dodo-knowledge` MCP to pull the latest payload shapes, and write a handler with signature verification following the Standard Webhooks spec.
 
 ## Local development
 
-Clone the repo with the skills submodule:
+Clone with the skills submodule:
 
 ```bash
-git clone --recurse-submodules https://github.com/dodopayments/dodo-claude-plugin.git
-cd dodo-claude-plugin
+git clone --recurse-submodules https://github.com/dodopayments/dodo-agent-plugin.git
+cd dodo-agent-plugin
 ```
 
-Validate the plugin and marketplace:
+Validate the Claude Code plugin and marketplace:
 
 ```bash
 claude plugin validate .
@@ -133,26 +153,38 @@ claude plugin validate .
 Load the plugin directly for a dev session:
 
 ```bash
-claude --plugin-dir ./dodo-claude-plugin
+claude --plugin-dir ./dodo-agent-plugin
 ```
 
-Then verify:
-
-- `/help` shows the `dodopayments` namespace
-- `/dodopayments:webhook-integration` loads the webhook skill
-
-Install it end-to-end through the bundled marketplace:
-
-```bash
-claude plugin marketplace add ./dodo-claude-plugin --scope local
-claude plugin install dodopayments@dodopayments --scope local
-```
-
-To refresh the bundled skills to the latest upstream version:
+Refresh the bundled skills to the latest upstream version:
 
 ```bash
 git submodule update --remote skills-src
 ```
+
+## For maintainers
+
+The repo is configured to publish the OpenCode npm package on every GitHub Release.
+
+**One-time setup (already done for this repo):**
+
+- npm scope `@dodopayments` exists and is owned by Dodo Payments.
+- GitHub Actions secret `NPM_TOKEN` is provisioned with publish rights to the `@dodopayments` scope.
+
+**Release workflow:**
+
+1. Bump the version in `.claude-plugin/plugin.json`.
+2. Run `node scripts/sync-manifests.mjs` to propagate the version to Cursor, Codex, npm, and marketplace manifests.
+3. Commit and tag.
+4. Create a GitHub Release - the `Publish @dodopayments/opencode-plugin` workflow runs automatically and publishes to npm with provenance.
+
+**Manual dry-run:**
+
+- Workflow dispatch with `dry_run: true` to validate the release pipeline without publishing.
+
+**CI check:**
+
+- `node scripts/sync-manifests.mjs --check` is run by the workflow and fails the release if any manifest is out of sync.
 
 ## Resources
 

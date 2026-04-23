@@ -1,0 +1,23 @@
+{
+    "name": "dodopayments",
+    "version": "0.2.0",
+    "description": "Dodo Payments tools for Cursor: integration skills + API/docs MCP servers.",
+    "author": {
+        "name": "Dodo Payments",
+        "email": "support@dodopayments.com"
+    },
+    "homepage": "https://docs.dodopayments.com/developer-resources/agent-skills",
+    "repository": "https://github.com/dodopayments/dodo-agent-plugin",
+    "license": "MIT",
+    "keywords": [
+        "dodopayments",
+        "payments",
+        "billing",
+        "subscriptions",
+        "cursor",
+        "mcp",
+        "skills"
+    ],
+    "skills": "skills/",
+    "mcpServers": ".mcp.json"
+}

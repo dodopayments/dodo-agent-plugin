@@ -1,13 +1,13 @@
 {
     "name": "dodopayments",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Dodo Payments tools for Claude Code, including integration agent skills and the Dodo Payments API and docs MCP servers.",
     "author": {
         "name": "Dodo Payments",
         "email": "support@dodopayments.com"
     },
     "homepage": "https://docs.dodopayments.com/developer-resources/agent-skills",
-    "repository": "https://github.com/dodopayments/dodo-claude-plugin",
+    "repository": "https://github.com/dodopayments/dodo-agent-plugin",
     "license": "MIT",
     "keywords": [
         "dodopayments",
