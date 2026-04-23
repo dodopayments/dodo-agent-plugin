@@ -45,28 +45,36 @@ Restart Cursor. The plugin loads skills from `.claude/skills/` (via Cursor's Cla
 
 ### OpenCode
 
-OpenCode distributes via npm. Add to your `opencode.json`:
+OpenCode distributes via npm. Add the plugin to your `opencode.json`:
 
 ```jsonc
 {
     "$schema": "https://opencode.ai/config.json",
+    "plugin": ["@dodopayments/opencode-plugin"]
+}
+```
+
+Restart OpenCode. Both MCP servers (`dodopayments-api`, `dodo-knowledge`) are registered automatically via the plugin's `config` hook, and the eight skills are auto-discovered from the installed package. No manual `mcp` block required.
+
+If you prefer the local stdio API server with your own API key instead of the default remote OAuth server, declare `dodopayments-api` yourself in `opencode.json` - your entry wins over the plugin default:
+
+```jsonc
+{
     "plugin": ["@dodopayments/opencode-plugin"],
     "mcp": {
         "dodopayments-api": {
             "type": "local",
-            "command": ["npx", "-y", "mcp-remote@latest", "https://mcp.dodopayments.com/sse"],
-            "enabled": true
-        },
-        "dodo-knowledge": {
-            "type": "local",
-            "command": ["npx", "-y", "mcp-remote@latest", "https://knowledge.dodopayments.com/mcp"],
+            "command": ["npx", "-y", "dodopayments-mcp@latest"],
+            "environment": {
+                "DODO_PAYMENTS_API_KEY": "dodo_test_...",
+                "DODO_PAYMENTS_WEBHOOK_KEY": "whsec_...",
+                "DODO_PAYMENTS_ENVIRONMENT": "test_mode"
+            },
             "enabled": true
         }
     }
 }
 ```
-
-OpenCode auto-discovers the eight skills from the installed package. Restart OpenCode to pick up the new config.
 
 ## Included Skills
 

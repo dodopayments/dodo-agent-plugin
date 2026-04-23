@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.3.0 - 2026-04-23
+
+### Changed
+
+- **OpenCode: MCP servers now register automatically.** `@dodopayments/opencode-plugin` no longer requires users to paste an `mcp: { ... }` block into their `opencode.json`. The plugin now implements OpenCode's `config` plugin hook and injects `dodopayments-api` and `dodo-knowledge` into the runtime config on load. Install reduces to:
+
+    ```jsonc
+    { "plugin": ["@dodopayments/opencode-plugin"] }
+    ```
+
+    This brings OpenCode to parity with the Claude Code, Codex, and Cursor installs, all of which already auto-register MCPs.
+
+- **User-declared MCPs win.** Registration uses nullish-assign (`??=`), so if a user declares their own entry for `dodopayments-api` or `dodo-knowledge` in `opencode.json`, their entry is preserved. This is the documented way to swap the default remote OAuth server for the local stdio `dodopayments-mcp` with a self-provided API key.
+
+### Removed
+
+- **Root `opencode.json`** has been removed from the repository and from the npm `files[]` array. It previously shipped as a reference snippet; the plugin's `config` hook supersedes it. Install instructions live in `README.md`.
+- **`translateMcpToOpencode` translation** in `scripts/sync-manifests.mjs`. The script no longer reads `.mcp.json` or writes `opencode.json` - it now only propagates the canonical version across the four plugin manifests and the npm `package.json`.
+
+### Migration
+
+If you were using a prior version with the manual `mcp: { ... }` block in your `opencode.json`, you can remove that block. No other changes required. If you were using a customized `mcp.dodopayments-api` entry (e.g. pointing at the local stdio server), keep it - your entry takes precedence.
+
 ## 0.2.0 - 2026-04-23
 
 ### Renamed

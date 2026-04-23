@@ -1,21 +1,9 @@
 // @dodopayments/opencode-plugin
 //
-// OpenCode plugin entry point for Dodo Payments.
-//
-// This plugin exists to make `@dodopayments/opencode-plugin` installable
-// from npm so users can reference it in their `opencode.json` "plugin" array.
-// It registers no runtime hooks - the value of this package is:
-//
-//   1. The bundled skills/ directory (OpenCode auto-discovers SKILL.md files
-//      from installed packages, so the 8 Dodo Payments skills become
-//      available once this package is installed).
-//
-//   2. The documented .mcp.json and opencode.json reference snippets, so
-//      users know exactly which MCP servers to add to their config.
-//
-// If future versions of this plugin need runtime behavior (e.g. injecting
-// Dodo-specific tools, hooking chat.message, etc.), add them to the returned
-// Hooks object. All Hooks fields are optional - see @opencode-ai/plugin types.
+// Registers the Dodo Payments MCP servers via OpenCode's `config` plugin
+// hook so users do not need to paste an `mcp: { ... }` block into their
+// `opencode.json`. The bundled skills/ directory is auto-discovered by
+// OpenCode separately.
 //
 // @see https://opencode.ai/docs/plugins
 // @see https://docs.dodopayments.com/developer-resources/agent-skills
@@ -24,7 +12,32 @@
  * @typedef {import("@opencode-ai/plugin").Plugin} Plugin
  */
 
+// OpenCode loads the user's opencode.json before invoking plugin `config`
+// hooks on the same mutable config object. Nullish-assign (`??=`) therefore
+// lets a user override any entry here by declaring the same key in their
+// own opencode.json - e.g. swapping the default remote OAuth server for the
+// local stdio `dodopayments-mcp` with their own API key.
+const DODO_MCP_SERVERS = {
+    "dodopayments-api": {
+        type: "local",
+        command: ["npx", "-y", "mcp-remote@latest", "https://mcp.dodopayments.com/sse"],
+        enabled: true,
+    },
+    "dodo-knowledge": {
+        type: "local",
+        command: ["npx", "-y", "mcp-remote@latest", "https://knowledge.dodopayments.com/mcp"],
+        enabled: true,
+    },
+};
+
 /** @type {Plugin} */
-const dodopayments = async () => ({});
+const dodopayments = async () => ({
+    config: async (config) => {
+        config.mcp ??= {};
+        for (const [name, entry] of Object.entries(DODO_MCP_SERVERS)) {
+            config.mcp[name] ??= entry;
+        }
+    },
+});
 
 export default dodopayments;

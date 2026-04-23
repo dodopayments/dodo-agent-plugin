@@ -1,6 +1,6 @@
 {
     "name": "dodopayments",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Dodo Payments tools for Claude Code, including integration agent skills and the Dodo Payments API and docs MCP servers.",
     "author": {
         "name": "Dodo Payments",
