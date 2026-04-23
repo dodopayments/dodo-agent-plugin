@@ -6,7 +6,7 @@
     },
     "metadata": {
         "description": "Dodo Payments plugin marketplace for Claude Code.",
-        "version": "0.1.0"
+        "version": "0.2.0"
     },
     "plugins": [
         {
@@ -18,7 +18,7 @@
                 "email": "support@dodopayments.com"
             },
             "homepage": "https://docs.dodopayments.com/developer-resources/agent-skills",
-            "repository": "https://github.com/dodopayments/dodo-claude-plugin",
+            "repository": "https://github.com/dodopayments/dodo-agent-plugin",
             "license": "MIT",
             "keywords": [
                 "dodopayments",

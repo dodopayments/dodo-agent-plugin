@@ -19,3 +19,6 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+
+# Internal agent scratch
+.sisyphus/

@@ -1,0 +1,45 @@
+name: Publish @dodopayments/opencode-plugin
+
+on:
+    release:
+        types: [published]
+    workflow_dispatch:
+        inputs:
+            dry_run:
+                description: "Run npm publish --dry-run only"
+                type: boolean
+                default: true
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+            - name: Checkout (with skills submodule)
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  registry-url: "https://registry.npmjs.org"
+
+            - name: Verify manifests are in sync
+              run: node scripts/sync-manifests.mjs --check
+
+            - name: Verify package contents (dry pack)
+              run: npm pack --dry-run
+
+            - name: Publish (dry run)
+              if: github.event_name == 'workflow_dispatch' && inputs.dry_run == true
+              run: npm publish --dry-run --access public
+
+            - name: Publish
+              if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.dry_run == false)
+              run: npm publish --provenance --access public
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
