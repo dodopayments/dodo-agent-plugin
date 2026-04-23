@@ -6,7 +6,7 @@
         "name": "Dodo Payments",
         "email": "support@dodopayments.com"
     },
-    "homepage": "https://docs.dodopayments.com/developer-resources/agent-skills",
+    "homepage": "https://docs.dodopayments.com",
     "repository": "https://github.com/dodopayments/dodo-agent-plugin",
     "license": "MIT",
     "keywords": [
