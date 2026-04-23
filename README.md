@@ -5,8 +5,6 @@
 [![npm](https://img.shields.io/npm/v/@dodopayments/opencode-plugin.svg?style=flat-square)](https://www.npmjs.com/package/@dodopayments/opencode-plugin)
 [![Discord](https://img.shields.io/discord/1305511580854779984?label=discord&style=flat-square)](https://discord.gg/bYqAp4ayYh)
 
-> **Renamed from `dodo-claude-plugin` in v0.2.0.** The old GitHub URL redirects to the new one; see [CHANGELOG](./CHANGELOG.md#020) for migration notes.
-
 The official Dodo Payments plugin for AI coding agents. Installs eight integration skills and two MCP servers across **Claude Code**, **Codex CLI**, **Cursor**, and **OpenCode** from a single source of truth.
 
 ## What you get
