@@ -37,15 +37,13 @@ codex plugin install dodopayments@dodopayments
 
 ### Cursor
 
-Manual install (pending Cursor marketplace listing):
+Manual install:
 
 ```bash
 git clone https://github.com/dodopayments/dodo-agent-plugin.git ~/.cursor/plugins/local/dodo-agent-plugin
 ```
 
 Restart Cursor. The plugin loads skills from `.claude/skills/` (via Cursor's Claude Code compat) and MCP servers from `.mcp.json`.
-
-To submit the plugin to Cursor's official marketplace, point [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish) at the GitHub repo.
 
 ### OpenCode
 
