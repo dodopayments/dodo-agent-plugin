@@ -11,8 +11,6 @@ const CURSOR_MANIFEST = ".cursor-plugin/plugin.json";
 const CODEX_MANIFEST = ".codex-plugin/plugin.json";
 const CLAUDE_MARKETPLACE = ".claude-plugin/marketplace.json";
 const PACKAGE_JSON = "package.json";
-const MCP_JSON = ".mcp.json";
-const OPENCODE_JSON = "opencode.json";
 
 function readJson(relPath) {
     return JSON.parse(readFileSync(join(ROOT, relPath), "utf8"));
@@ -28,25 +26,6 @@ function writeJson(relPath, value) {
         return;
     }
     writeFileSync(join(ROOT, relPath), serialized);
-}
-
-function translateMcpToOpencode(mcpServers) {
-    const out = {};
-    for (const [name, entry] of Object.entries(mcpServers)) {
-        if (entry.url) {
-            const remote = { type: "remote", url: entry.url, enabled: true };
-            if (entry.headers) remote.headers = entry.headers;
-            out[name] = remote;
-            continue;
-        }
-        const command = entry.command
-            ? (Array.isArray(entry.command) ? [...entry.command, ...(entry.args ?? [])] : [entry.command, ...(entry.args ?? [])])
-            : (entry.args ?? []);
-        const local = { type: "local", command, enabled: true };
-        if (entry.env) local.environment = entry.env;
-        out[name] = local;
-    }
-    return out;
 }
 
 function main() {
@@ -72,11 +51,6 @@ function main() {
     marketplace.metadata = marketplace.metadata ?? {};
     marketplace.metadata.version = canonicalVersion;
     writeJson(CLAUDE_MARKETPLACE, marketplace);
-
-    const mcp = readJson(MCP_JSON);
-    const opencode = readJson(OPENCODE_JSON);
-    opencode.mcp = translateMcpToOpencode(mcp.mcpServers ?? {});
-    writeJson(OPENCODE_JSON, opencode);
 
     if (CHECK_MODE) {
         console.log(`All in sync at version ${canonicalVersion}.`);
