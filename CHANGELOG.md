@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.3 - 2026-05-08
+
+### Added
+
+- **Per-MCP enable/disable toggles for OpenCode.** The npm plugin now reads two environment variables before registering each MCP:
+  - `DODO_DISABLE_API_MCP=1` skips registering `dodopayments-api`.
+  - `DODO_DISABLE_KNOWLEDGE_MCP=1` skips registering `dodo-knowledge`.
+
+  Truthy values: `1`, `true`, `yes`, `on` (case-insensitive). Both unset = both registered (prior default behavior preserved). Env vars chosen over an `opencode.json` config block because OpenCode's top-level config schema is strict and rejects unknown keys ([anomalyco/opencode#9161](https://github.com/anomalyco/opencode/issues/9161)).
+- **Explicit `"enabled": true` on every MCP entry in `.mcp.json`** (Claude Code / Codex / Cursor bundle). Gives users a clear field to flip to `false` in their own override `.mcp.json` to disable an individual server. This is the supported path until per-MCP plugin toggles land upstream ([anthropics/claude-code#27105](https://github.com/anthropics/claude-code/issues/27105), [#46373](https://github.com/anthropics/claude-code/issues/46373), [#50826](https://github.com/anthropics/claude-code/issues/50826)).
+- **README sections** documenting the new toggles for all four clients (Claude Code, Codex CLI, Cursor, OpenCode), plus an env-var table in `opencode-plugin/README.md`.
+
 ## 0.3.2 - 2026-05-08
 
 ### Fixed

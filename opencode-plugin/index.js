@@ -1,22 +1,13 @@
 // @dodopayments/opencode-plugin
-//
-// Registers the Dodo Payments MCP servers via OpenCode's `config` plugin
-// hook so users do not need to paste an `mcp: { ... }` block into their
-// `opencode.json`. The bundled skills/ directory is auto-discovered by
-// OpenCode separately.
-//
+// Registers Dodo Payments MCP servers via OpenCode's `config` hook.
 // @see https://opencode.ai/docs/plugins
-// @see https://docs.dodopayments.com/developer-resources/agent-skills
 
 /**
  * @typedef {import("@opencode-ai/plugin").Plugin} Plugin
  */
 
-// OpenCode loads the user's opencode.json before invoking plugin `config`
-// hooks on the same mutable config object. Nullish-assign (`??=`) therefore
-// lets a user override any entry here by declaring the same key in their
-// own opencode.json - e.g. swapping the default remote OAuth server for the
-// local stdio `dodopayments-mcp` with their own API key.
+// Nullish-assign (`??=`) lets users override any entry by declaring the
+// same MCP key in their own opencode.json.
 const DODO_MCP_SERVERS = {
     "dodopayments-api": {
         type: "local",
@@ -30,11 +21,27 @@ const DODO_MCP_SERVERS = {
     },
 };
 
+// Env vars chosen over opencode.json config because OpenCode's top-level
+// schema is strict and rejects unknown keys (anomalyco/opencode#9161).
+const DISABLE_FLAGS = {
+    "dodopayments-api": "DODO_DISABLE_API_MCP",
+    "dodo-knowledge": "DODO_DISABLE_KNOWLEDGE_MCP",
+};
+
+const TRUTHY = new Set(["1", "true", "yes", "on"]);
+
+function isDisabled(envVarName) {
+    const raw = process.env[envVarName];
+    if (raw === undefined || raw === null || raw === "") return false;
+    return TRUTHY.has(String(raw).trim().toLowerCase());
+}
+
 /** @type {Plugin} */
 const dodopayments = async () => ({
     config: async (config) => {
         config.mcp ??= {};
         for (const [name, entry] of Object.entries(DODO_MCP_SERVERS)) {
+            if (isDisabled(DISABLE_FLAGS[name])) continue;
             config.mcp[name] ??= entry;
         }
     },

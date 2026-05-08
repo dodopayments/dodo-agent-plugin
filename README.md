@@ -146,6 +146,50 @@ Then edit `.mcp.json` to point `dodopayments-api` at the local stdio server:
 
 Run `/reload-plugins` to apply changes to your current session.
 
+## Enable / disable individual MCP servers
+
+Both MCPs ship enabled by default. You can turn either one off independently.
+
+### OpenCode
+
+The npm plugin reads two environment variables before registering MCPs:
+
+| Env var | Effect |
+|---|---|
+| `DODO_DISABLE_API_MCP=1` | Skips registering `dodopayments-api` |
+| `DODO_DISABLE_KNOWLEDGE_MCP=1` | Skips registering `dodo-knowledge` |
+
+Truthy values: `1`, `true`, `yes`, `on` (case-insensitive). Export the var in your shell profile or set it inline:
+
+```bash
+DODO_DISABLE_API_MCP=1 opencode
+```
+
+### Claude Code, Codex CLI, Cursor
+
+These clients load MCPs from the static `.mcp.json` shipped with the plugin. To disable a server, override its entry in your own project-level config and set `"enabled": false`.
+
+**Claude Code** - edit `.mcp.json` at your project root (or run `claude mcp disable dodopayments-api`):
+
+```json
+{
+    "mcpServers": {
+        "dodopayments-api": {
+            "type": "stdio",
+            "command": "npx",
+            "args": ["-y", "mcp-remote@latest", "https://mcp.dodopayments.com/sse"],
+            "enabled": false
+        }
+    }
+}
+```
+
+Run `/reload-plugins` to apply.
+
+**Codex CLI / Cursor** - the same `enabled: false` pattern works in any project-level `.mcp.json` that overrides the plugin's bundled file. Restart the client after editing.
+
+> Per-MCP toggles inside the Claude Code `/plugin` UI are tracked upstream in [anthropics/claude-code#27105](https://github.com/anthropics/claude-code/issues/27105) and [#46373](https://github.com/anthropics/claude-code/issues/46373). Until those land, the `enabled: false` override above is the supported path.
+
 ## A prompt to try first
 
 Once the plugin is active, try:

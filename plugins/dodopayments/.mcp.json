@@ -7,7 +7,8 @@
                 "-y",
                 "mcp-remote@latest",
                 "https://mcp.dodopayments.com/sse"
-            ]
+            ],
+            "enabled": true
         },
         "dodo-knowledge": {
             "type": "stdio",
@@ -16,7 +17,8 @@
                 "-y",
                 "mcp-remote@latest",
                 "https://knowledge.dodopayments.com/mcp"
-            ]
+            ],
+            "enabled": true
         }
     }
 }
