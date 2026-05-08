@@ -8,7 +8,7 @@
             "name": "dodopayments",
             "source": {
                 "source": "local",
-                "path": "./"
+                "path": "./plugins/dodopayments"
             },
             "policy": {
                 "installation": "AVAILABLE",

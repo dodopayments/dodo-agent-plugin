@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.3.2 - 2026-05-08
+
+### Fixed
+
+- **Codex CLI plugin still didn't appear in `/plugins` after 0.3.1.** ([#4](https://github.com/dodopayments/dodo-agent-plugin/issues/4)) The 0.3.1 marketplace pointed the plugin source at `path: "./"`. Codex's [`resolve_local_plugin_source_path`](https://github.com/openai/codex/blob/main/codex-rs/core-plugins/src/marketplace.rs) rejects this — after stripping the `./` prefix, the remainder is empty and the plugin is silently dropped (warn-logged, then skipped). The plugin must live in a non-empty subdirectory.
+- **Plugin manifest paths missing the required `./` prefix.** Codex's [`resolve_manifest_path`](https://github.com/openai/codex/blob/main/codex-rs/core-plugins/src/manifest.rs) silently drops `skills` and `mcpServers` paths that don't start with `./`. The repo's `.codex-plugin/plugin.json` had `"skills": "skills/"` and `"mcpServers": ".mcp.json"`, both ignored by Codex.
+- **`skills/` symlinks were dangling in Codex's clone.** `codex plugin marketplace add` does a plain `git clone` (no `--recurse-submodules`), so the existing `skills/` symlinks pointing into the empty `skills-src/` submodule resolved to nothing. Even with the marketplace fixed, no skills would have loaded.
+
+### Added
+
+- **`plugins/dodopayments/`** — self-contained Codex plugin bundle with real (non-symlink, non-submodule) files. Contains `.codex-plugin/plugin.json` with proper `./` paths, `.mcp.json`, and all eight `SKILL.md` files copied from `skills-src/`. This subdirectory is what `.agents/plugins/marketplace.json` now points at, and it's what Codex actually loads.
+- **`scripts/bundle-codex-plugin.mjs`** — generates `plugins/dodopayments/` from canonical sources (`.codex-plugin/plugin.json`, `.mcp.json`, `skills-src/dodo-payments/`). Supports `--check` for CI drift detection. Wired into `scripts/sync-manifests.mjs` so version bumps and bundle refreshes happen together.
+
+### Changed
+
+- **`.agents/plugins/marketplace.json`**: source path moved from `./` to `./plugins/dodopayments`.
+- **`.codex-plugin/plugin.json`** (root): `skills` and `mcpServers` paths now use the required `./` prefix.
+- **`scripts/sync-manifests.mjs`**: now runs `bundle-codex-plugin.mjs` after the version sync, so the bundle stays in lockstep with the canonical manifests.
+
+### Migration
+
+If you ran `codex plugin marketplace add dodopayments/dodo-agent-plugin` before this release and the plugin did not appear in `/plugins`, refresh the marketplace cache:
+
+```bash
+codex plugin marketplace upgrade dodopayments
+```
+
+If the plugin still doesn't show up after upgrading, remove and re-add the marketplace:
+
+```bash
+codex plugin marketplace remove dodopayments
+codex plugin marketplace add dodopayments/dodo-agent-plugin
+```
+
+Then open `codex`, run `/plugins`, switch to the **Dodo Payments** marketplace, and install the **dodopayments** plugin.
+
 ## 0.3.1 - 2026-05-08
 
 ### Fixed

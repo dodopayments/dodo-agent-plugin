@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { spawnSync } from "node:child_process";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CHECK_MODE = process.argv.includes("--check");
@@ -11,6 +12,7 @@ const CURSOR_MANIFEST = ".cursor-plugin/plugin.json";
 const CODEX_MANIFEST = ".codex-plugin/plugin.json";
 const CLAUDE_MARKETPLACE = ".claude-plugin/marketplace.json";
 const PACKAGE_JSON = "package.json";
+const BUNDLE_SCRIPT = "scripts/bundle-codex-plugin.mjs";
 
 function readJson(relPath) {
     return JSON.parse(readFileSync(join(ROOT, relPath), "utf8"));
@@ -51,6 +53,16 @@ function main() {
     marketplace.metadata = marketplace.metadata ?? {};
     marketplace.metadata.version = canonicalVersion;
     writeJson(CLAUDE_MARKETPLACE, marketplace);
+
+    // Refresh / verify the Codex plugin bundle. The bundle reads from
+    // `.codex-plugin/plugin.json` and `.mcp.json`, so it must run AFTER the
+    // version sync above.
+    const bundleArgs = [join(ROOT, BUNDLE_SCRIPT)];
+    if (CHECK_MODE) bundleArgs.push("--check");
+    const bundle = spawnSync(process.execPath, bundleArgs, { stdio: "inherit" });
+    if (bundle.status !== 0) {
+        throw new Error(`bundle-codex-plugin.mjs exited with status ${bundle.status}`);
+    }
 
     if (CHECK_MODE) {
         console.log(`All in sync at version ${canonicalVersion}.`);
