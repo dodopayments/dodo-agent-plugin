@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.1 - 2026-05-08
+
+### Fixed
+
+- **Codex CLI install was broken on two levels.** ([#4](https://github.com/dodopayments/dodo-agent-plugin/issues/4))
+    1. The README told users to run `codex plugin install dodopayments@dodopayments`, which is not a real Codex subcommand. Codex CLI 0.129+ only exposes `codex plugin marketplace {add,upgrade,remove}`; actual plugin installation happens via the `/plugins` slash command inside the Codex TUI.
+    2. After `codex plugin marketplace add` succeeded, the plugin still did not appear in `/plugins`. The repo only shipped a Claude-Code-style manifest at `.claude-plugin/marketplace.json`. Codex prefers `.agents/plugins/marketplace.json` with its own schema (object-form `source`, required `policy` and `category` fields). The Claude-Code-shaped manifest was not a valid alternate layout for our split (`.codex-plugin/plugin.json` lives in a separate directory from `.claude-plugin/`).
+
+### Added
+
+- **`.agents/plugins/marketplace.json`** — canonical Codex marketplace manifest pointing the `dodopayments` plugin at the repo root, where `.codex-plugin/plugin.json` already lives. Schema follows the official Codex spec with `policy.installation: AVAILABLE`, `policy.authentication: ON_INSTALL`, and `category: Developer Tools`.
+
+### Changed
+
+- **README Codex section** rewritten to reflect the actual two-step install flow (`codex plugin marketplace add` from the shell, then `/plugins` from inside the TUI). Includes a `codex plugin marketplace upgrade dodopayments` hint for users who registered the marketplace before this fix.
+
+### Migration
+
+If you ran `codex plugin marketplace add dodopayments/dodo-agent-plugin` before this release and the plugin did not appear in `/plugins`, refresh the marketplace cache:
+
+```bash
+codex plugin marketplace upgrade dodopayments
+```
+
+Then open `codex`, run `/plugins`, switch to the **Dodo Payments** marketplace, and install the **dodopayments** plugin.
+
 ## 0.3.0 - 2026-04-23
 
 ### Changed

@@ -26,12 +26,29 @@ The API MCP server uses browser OAuth by default, so no keys are required at ins
 
 ### Codex CLI
 
-Codex reads `.claude-plugin/marketplace.json` natively, so the same repo works:
+Codex installs plugins in two steps: register the marketplace from your shell, then install the plugin from inside the Codex TUI.
+
+1. Register the marketplace:
+
+    ```bash
+    codex plugin marketplace add dodopayments/dodo-agent-plugin
+    ```
+
+2. Open Codex and run the `/plugins` slash command:
+
+    ```bash
+    codex
+    ```
+
+    Then type `/plugins`, switch to the **Dodo Payments** marketplace, select the **dodopayments** plugin, and choose **Install plugin**.
+
+If you previously added the marketplace before this fix landed and the plugin doesn't appear under `/plugins`, refresh it:
 
 ```bash
-codex plugin marketplace add dodopayments/dodo-agent-plugin
-codex plugin install dodopayments@dodopayments
+codex plugin marketplace upgrade dodopayments
 ```
+
+> Codex CLI does not have a `codex plugin install` subcommand. Plugin installation always happens through the in-TUI `/plugins` flow ([official docs](https://developers.openai.com/codex/plugins)).
 
 ### Cursor
 
