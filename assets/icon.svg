@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dodo Payments">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#166534"/>
+      <stop offset="1" stop-color="#0D0D0D"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="128" y1="96" x2="384" y2="416" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C6FE1E"/>
+      <stop offset="1" stop-color="#779812"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M160 128h96c70.7 0 128 57.3 128 128s-57.3 128-128 128h-96c-13.3 0-24-10.7-24-24V152c0-13.3 10.7-24 24-24Zm56 80v96h40c26.5 0 48-21.5 48-48s-21.5-48-48-48h-40Z" fill="url(#accent)"/>
+  <circle cx="216" cy="256" r="22" fill="#0D0D0D"/>
+</svg>
