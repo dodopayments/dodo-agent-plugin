@@ -1,6 +1,6 @@
 {
     "name": "dodopayments",
-    "version": "0.3.3",
+    "version": "0.4.0",
     "description": "Dodo Payments tools for Cursor: integration skills + API/docs MCP servers.",
     "author": {
         "name": "Dodo Payments",

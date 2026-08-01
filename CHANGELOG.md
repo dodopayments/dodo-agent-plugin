@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.4.0 - 2026-08-01
+
+### Added
+
+- **Nine new agent skills**, bringing the bundle from eight to seventeen: `framework-adapters`, `product-catalog-management`, `customer-management`, `refunds-and-disputes`, `discounts-and-promotions`, `localized-pricing`, `mobile-checkout`, `testing-and-go-live`, `better-auth-integration`. Symlinked in `skills/` and materialized into `plugins/dodopayments/skills/` by the existing bundler.
+
+### Changed
+
+- **`skills-src` submodule bumped** to pick up [dodopayments/skills#6](https://github.com/dodopayments/skills/pull/6), which rewrote all eight existing skills against the current API and added the nine above.
+- **README** now lists all seventeen skills grouped by task, and the version badge (stale at `0.2.0`) tracks the canonical manifest version again.
+
+### Fixed
+
+Carried in from the skills submodule — these were shipping broken guidance to agents:
+
+- **`api.dodopayments.com` has no DNS record.** The base URL in `best-practices` was unreachable; corrected to `live.dodopayments.com` / `test.dodopayments.com`.
+- **Webhook signature verification could never succeed.** Hand-rolled HMAC in four languages signed `timestamp.payload`, omitting `webhook-id`. Dodo follows the Standard Webhooks spec (`webhook-id.webhook-timestamp.body`). Replaced with `client.webhooks.unwrap()` / the `standardwebhooks` library.
+- **Wrong SDK surface**: `customers.createPortalSession()` does not exist, deprecated `payments.create()` was taught for new integrations, `sk_test_`/`sk_live_` key prefixes are Stripe's format (Dodo issues `dodo_test_`/`dodo_live_`), and a nonexistent "publishable key" invited leaking a secret key client-side.
+- **Unsafe payment logic**: `dispute.accepted` was treated as a win that restored customer access (it means the merchant conceded), and subscription cancellation revoked every license key a customer owned, including keys for unrelated products.
+
 ## 0.3.3 - 2026-05-08
 
 ### Added
