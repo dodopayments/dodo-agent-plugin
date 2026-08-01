@@ -100,9 +100,14 @@ import express from 'express';
 const app = express();
 app.use(express.raw({ type: 'application/json' }));
 
+// `environment` is a narrow union, but env vars are `string | undefined`.
+// Narrow explicitly rather than casting, and default to test mode so a missing
+// variable can never accidentally hit live.
+const environment = process.env.DODO_PAYMENTS_ENVIRONMENT === 'live_mode' ? 'live_mode' : 'test_mode';
+
 const client = new DodoPayments({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY,
-  environment: process.env.DODO_PAYMENTS_ENVIRONMENT,
+  environment,
   webhookKey: process.env.DODO_PAYMENTS_WEBHOOK_KEY,
 });
 
@@ -128,14 +133,24 @@ app.post('/webhook', async (req, res) => {
 **Python:**
 
 ```python
+from typing import Literal
 from fastapi import FastAPI, Request, HTTPException
 from dodopayments import DodoPayments
 import os
 
+# `environment` is Literal["live_mode", "test_mode"], not str. Passing the raw
+# variable through raises at construction: unset gives
+# `ValueError: Unknown environment: None`, and a typo like "test" gives
+# `Unknown environment: test`. Narrow it, defaulting to test mode so a
+# misconfigured variable can never select live.
+ENVIRONMENT: Literal["live_mode", "test_mode"] = (
+    "live_mode" if os.getenv("DODO_PAYMENTS_ENVIRONMENT") == "live_mode" else "test_mode"
+)
+
 app = FastAPI()
 client = DodoPayments(
     bearer_token=os.getenv("DODO_PAYMENTS_API_KEY"),
-    environment=os.getenv("DODO_PAYMENTS_ENVIRONMENT"),
+    environment=ENVIRONMENT,
     webhook_key=os.getenv("DODO_PAYMENTS_WEBHOOK_KEY"),
 )
 
@@ -160,31 +175,45 @@ async def handle_webhook(request: Request):
 
 ```go
 import (
-	"context"
 	"io"
 	"net/http"
 	"os"
+
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 )
 
+// The Go SDK has no WithEnvironment(string). It exposes two explicit options,
+// so narrow here and default to test mode: an unset or misspelled variable must
+// never select live mode.
+func dodoEnvironment() option.RequestOption {
+	if os.Getenv("DODO_PAYMENTS_ENVIRONMENT") == "live_mode" {
+		return option.WithEnvironmentLiveMode()
+	}
+	return option.WithEnvironmentTestMode()
+}
+
 func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	client := dodopayments.NewClient(
 		option.WithBearerToken(os.Getenv("DODO_PAYMENTS_API_KEY")),
-		option.WithEnvironment(os.Getenv("DODO_PAYMENTS_ENVIRONMENT")),
+		dodoEnvironment(),
 		option.WithWebhookKey(os.Getenv("DODO_PAYMENTS_WEBHOOK_KEY")),
 	)
-	
-	rawBody, _ := io.ReadAll(r.Body)
-	if _, err := client.Webhooks.Unwrap(context.Background(), rawBody, map[string]string{
-		"webhook-id":        r.Header.Get("webhook-id"),
-		"webhook-signature": r.Header.Get("webhook-signature"),
-		"webhook-timestamp": r.Header.Get("webhook-timestamp"),
-	}); err != nil {
+
+	rawBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Cannot read body", http.StatusBadRequest)
+		return
+	}
+
+	// Unwrap takes the raw body and the request headers directly. It is not
+	// context-aware and does not take a map: the signature is
+	// Unwrap(payload []byte, headers http.Header, opts ...option.RequestOption).
+	if _, err := client.Webhooks.Unwrap(rawBody, r.Header); err != nil {
 		http.Error(w, "Invalid signature", http.StatusUnauthorized)
 		return
 	}
-	
+
 	// Signature verified. Process the event.
 	w.WriteHeader(http.StatusOK)
 }
@@ -331,19 +360,26 @@ These concern virtual credit entitlements, not monetary wallet balances.
 
 ## Production-Grade Handler Pattern
 
-Respond quickly after durably recording the event, process asynchronously, and use idempotency keys. If the durable write fails, return a non-`2xx` response so Dodo retries:
+Respond quickly after durably recording the event, process asynchronously, and use idempotency keys. In the worker, insert the idempotency claim and apply all durable business changes in one database transaction. If processing throws, the transaction rolls back the claim so the job can retry safely:
 
 ```typescript
 import DodoPayments from 'dodopayments';
 import express from 'express';
-import { Queue, Worker } from 'bullmq'; // or your async queue
+import { Queue, Worker } from 'bullmq';
+
+// BullMQ is illustrative; use your preferred durable async queue.
 
 const app = express();
 app.use(express.raw({ type: 'application/json' }));
 
+// `environment` is a narrow union, but env vars are `string | undefined`.
+// Narrow explicitly rather than casting, and default to test mode so a missing
+// variable can never accidentally hit live.
+const environment = process.env.DODO_PAYMENTS_ENVIRONMENT === 'live_mode' ? 'live_mode' : 'test_mode';
+
 const client = new DodoPayments({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY,
-  environment: process.env.DODO_PAYMENTS_ENVIRONMENT,
+  environment,
   webhookKey: process.env.DODO_PAYMENTS_WEBHOOK_KEY,
 });
 
@@ -377,7 +413,11 @@ app.post('/webhook', async (req, res) => {
     await eventQueue.add(
       `process-${unwrapped.type}`,
       { event: unwrapped, webhookId },
-      { jobId: webhookId } // Prevents duplicate queue entries
+      {
+        jobId: webhookId, // Prevents duplicate queue entries
+        attempts: 8,
+        backoff: { type: 'exponential', delay: 1000 },
+      }
     );
     return res.json({ received: true });
   } catch (error) {
@@ -392,26 +432,29 @@ const worker = new Worker<WebhookJob>(
   async (job) => {
     const { event, webhookId } = job.data;
 
-    // Atomically claim the webhook before any side effects.
-    const claim = await db.webhookLog.createMany({
-      data: [{ webhookId, eventType: event.type }],
-      skipDuplicates: true,
-    });
-    if (claim.count === 0) return;
+    await db.$transaction(async (tx) => {
+      const claim = await tx.webhookLog.createMany({
+        data: [{ webhookId, eventType: event.type }],
+        skipDuplicates: true,
+      });
+      if (claim.count === 0) return;
 
-    switch (event.type) {
-      case 'payment.succeeded':
-        await handlePaymentSucceeded(event.data);
-        break;
-      case 'subscription.active':
-        await handleSubscriptionActive(event.data);
-        break;
-      // ... handle other events
-    }
+      switch (event.type) {
+        case 'payment.succeeded':
+          await handlePaymentSucceeded(event.data, tx);
+          break;
+        case 'subscription.active':
+          await handleSubscriptionActive(event.data, tx);
+          break;
+        // ... handle other events
+      }
+    });
   },
   { connection }
 );
 ```
+
+The handlers above must perform entitlement writes through `tx`. Queue emails or other external work through a transactional outbox; a database transaction cannot roll back an already-sent external request.
 
 ---
 
@@ -453,7 +496,7 @@ If you use a supported framework, use the official adaptor package for built-in 
 
 **Next.js example:**
 
-The adapter callback does not expose `webhook-id`, so this payment example atomically claims `payment_id` before side effects. Use a handler that exposes `webhook-id` for event types without a verified stable identifier.
+The adapter callback does not expose `webhook-id`, so this payment example uses `payment_id` as its stable key and commits the claim and durable fulfillment together. Use a handler that exposes `webhook-id` for event types without a verified stable identifier.
 
 ```typescript
 // app/api/webhook/dodo-payments/route.ts
@@ -467,22 +510,25 @@ export const POST = Webhooks({
 
     if (payload.type !== 'payment.succeeded') return;
 
-    // webhookLog.webhookId must have a unique constraint.
-    const claim = await db.webhookLog.createMany({
-      data: [{
-        webhookId: payload.data.payment_id,
-        eventType: payload.type,
-      }],
-      skipDuplicates: true,
-    });
-    if (claim.count === 0) return;
+    // webhookLog.webhookId must have a unique constraint. If fulfillment
+    // throws, the claim rolls back and Dodo's redelivery can retry it.
+    await db.$transaction(async (tx) => {
+      const claim = await tx.webhookLog.createMany({
+        data: [{
+          webhookId: payload.data.payment_id,
+          eventType: payload.type,
+        }],
+        skipDuplicates: true,
+      });
+      if (claim.count === 0) return;
 
-    await handlePaymentSucceeded(payload.data);
+      await handlePaymentSucceeded(payload.data, tx);
+    });
   },
 });
 ```
 
-Continue to handle `subscription.active` with `handleSubscriptionActive(payload.data)` only in a handler that can first atomically claim its `webhook-id`.
+Handle `subscription.active` only in a handler that exposes `webhook-id`, then commit that claim and the entitlement changes in the same transaction.
 
 ---
 
@@ -500,20 +546,20 @@ Continue to handle `subscription.active` with `handleSubscriptionActive(payload.
 Forward real test-mode events to localhost:
 
 ```bash
-dodo wh listen
+dodo wh listen http://localhost:3000/webhook
 ```
 
-This creates a test webhook, opens a WebSocket relay, and forwards events with valid signatures to your local URL. Requires a test-mode API key.
+This creates a test webhook, opens a WebSocket relay, and forwards events with valid signatures to your local URL. Requires a test-mode API key. The URL argument is required in direct mode — bare `dodo wh listen` only works as `/wh listen` inside the TUI.
 
 ### CLI: Unsigned mock events
 
 Generate realistic unsigned payloads for testing without signature verification:
 
 ```bash
-dodo wh trigger
+dodo wh trigger payment.success http://localhost:3000/webhook
 ```
 
-Use `unsafeUnwrap()` only for these unsigned payloads.
+Use `unsafeUnwrap()` only for these unsigned payloads. Both arguments are required in direct mode.
 
 ### Tunnel
 
@@ -589,6 +635,8 @@ app.get('/checkout/return', (req, res) => {
 
 **Correct:** Grant access only after receiving and verifying a webhook:
 ```typescript
+const event = client.webhooks.unwrap(rawBody, { headers });
+
 if (event.type === 'payment.succeeded') {
   grantAccess(event.data.customer.customer_id);
 }
@@ -633,6 +681,40 @@ await queue.add('process-event', unwrapped); // A crash can lose an acknowledged
 ```
 
 **Correct:** Verify the signature, durably insert or enqueue the event, and only then return `2xx`. If persistence fails, return non-`2xx` so Dodo retries.
+
+### 8. Committing an idempotency claim before fulfillment
+
+**Wrong:**
+```typescript
+const claim = await db.webhookLog.createMany({
+  data: [{ webhookId }],
+  skipDuplicates: true,
+});
+if (claim.count === 0) return;
+
+await grantSubscriptionEntitlements(event.data); // A failure leaves the claim behind
+```
+
+The retry sees the existing claim and skips fulfillment, permanently dropping the event.
+
+**Correct:** Commit the claim and all durable fulfillment changes in one transaction. A failure rolls both back, so the retry can claim the event again:
+```typescript
+const event = client.webhooks.unwrap(rawBody, { headers });
+
+await db.$transaction(async (tx) => {
+  const claim = await tx.webhookLog.createMany({
+    data: [{ webhookId, eventType: event.type }],
+    skipDuplicates: true,
+  });
+  if (claim.count === 0) return;
+
+  if (event.type === 'subscription.active') {
+    await grantSubscriptionEntitlements(event.data, tx);
+  }
+});
+```
+
+Use a transactional outbox for email or other external effects that must follow the database commit.
 
 ---
 
