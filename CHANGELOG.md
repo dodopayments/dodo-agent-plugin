@@ -19,6 +19,14 @@ Carried in from the skills submodule — these were shipping broken guidance to 
 - **Webhook signature verification could never succeed.** Hand-rolled HMAC in four languages signed `timestamp.payload`, omitting `webhook-id`. Dodo follows the Standard Webhooks spec (`webhook-id.webhook-timestamp.body`). Replaced with `client.webhooks.unwrap()` / the `standardwebhooks` library.
 - **Wrong SDK surface**: `customers.createPortalSession()` does not exist, deprecated `payments.create()` was taught for new integrations, `sk_test_`/`sk_live_` key prefixes are Stripe's format (Dodo issues `dodo_test_`/`dodo_live_`), and a nonexistent "publishable key" invited leaking a secret key client-side.
 - **Unsafe payment logic**: `dispute.accepted` was treated as a win that restored customer access (it means the merchant conceded), and subscription cancellation revoked every license key a customer owned, including keys for unrelated products.
+- **Access control that silently no-opped**: `licenseKeys.update()` was sent a nonexistent `status` field instead of `disabled`, and subscription webhook handlers read `data.customer_id` where the payload nests the customer — passing `undefined` to every grant and revoke call.
+- **Framework adapter examples**: `@dodopayments/express` exports `checkoutHandler`, not `Checkout`; `@dodopayments/fastify` returns `{ getHandler, postHandler }` rather than a callable; `@dodopayments/nuxt` auto-imports its handlers and exports only the Nuxt module from its root. `environment` was passed unnarrowed in every adapter, which does not type-check against the SDK's literal union.
+- **Non-TypeScript examples**: the Go webhook handler called a nonexistent `option.WithEnvironment` and used the wrong `Unwrap` signature; the Python client was constructed with an unnarrowed env var that raises `ValueError` at startup; the Go quick-start called `os.Getenv` without importing `os`.
+- **CLI documentation**: `dodo wh listen` was described as a tunnel that prints a public URL (it is an outbound relay that prints none), and `dodo wh trigger` payloads were not documented as unsigned — contradicting the adjacent instruction to always verify signatures.
+
+### Enforcement
+
+The submodule now carries CI that compiles every published example against the real SDKs, so the corrections above cannot silently regress: 217 TypeScript blocks (including the `@dodopayments/*` adapters), Go via `go build` against `dodopayments-go`, and Python via pyright. Structural rules cover hostnames, key prefixes, hand-rolled webhook HMAC, and manifest/README/frontmatter agreement.
 
 ## 0.3.3 - 2026-05-08
 
