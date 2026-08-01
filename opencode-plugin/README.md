@@ -1,6 +1,6 @@
 # @dodopayments/opencode-plugin
 
-Official OpenCode plugin for Dodo Payments. Ships eight integration skills and auto-registers two MCP servers.
+Official OpenCode plugin for Dodo Payments. Ships seventeen integration skills and auto-registers two MCP servers.
 
 This package is part of [`dodopayments/dodo-agent-plugin`](https://github.com/dodopayments/dodo-agent-plugin) - the universal Dodo Payments plugin that also installs into Claude Code, Codex, and Cursor.
 
@@ -18,12 +18,12 @@ Add to your `opencode.json`:
 Restart OpenCode. That's it.
 
 - Both MCP servers are registered automatically via the plugin's `config` hook.
-- The eight skills are auto-discovered from this package's `skills/` directory.
+- The seventeen skills are auto-discovered from this package's `skills/` directory.
 - The first call to `dodopayments-api` opens a browser for OAuth. `dodo-knowledge` needs no auth.
 
 ## What you get
 
-Eight agent skills (auto-loaded when relevant): `best-practices`, `checkout-integration`, `subscription-integration`, `webhook-integration`, `usage-based-billing`, `credit-based-billing`, `license-keys`, `billing-sdk`.
+Seventeen agent skills (auto-loaded when relevant): `best-practices`, `framework-adapters`, `testing-and-go-live`, `checkout-integration`, `subscription-integration`, `mobile-checkout`, `webhook-integration`, `credit-based-billing`, `usage-based-billing`, `license-keys`, `product-catalog-management`, `discounts-and-promotions`, `localized-pricing`, `customer-management`, `refunds-and-disputes`, `billing-sdk`, `better-auth-integration`.
 
 Two MCP servers (registered automatically):
 
