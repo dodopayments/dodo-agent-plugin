@@ -10,6 +10,7 @@
 
 - **`skills-src` submodule bumped** to pick up [dodopayments/skills#6](https://github.com/dodopayments/skills/pull/6), which rewrote all eight existing skills against the current API and added the nine above.
 - **README** now lists all seventeen skills grouped by task, and the version badge (stale at `0.2.0`) tracks the canonical manifest version again.
+- **Codex marketplace listing** (`.codex-plugin/plugin.json` `longDescription`) and the **npm package README** (`opencode-plugin/README.md`) no longer advertise "eight skills"; both now describe the seventeen shipped.
 
 ### Fixed
 
