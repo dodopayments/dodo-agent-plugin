@@ -48,7 +48,20 @@ const overlays = {
     cursor: stripComments(read("overlays/cursor.json")),
 };
 
-const { version, name, description, author, homepage, repository, license } = plugin;
+const { version, name, author, homepage, repository, license } = plugin;
+
+/**
+ * Codex UI metadata lives in the spec's extension namespace. Fail loudly rather
+ * than emitting manifests with `undefined` fields if it is ever removed.
+ */
+function codexInterface() {
+    const value = plugin.extensions?.["com.openai"]?.interface;
+    if (!value) {
+        console.error('plugin.json is missing extensions["com.openai"].interface, which the Codex manifests require.');
+        process.exit(1);
+    }
+    return value;
+}
 
 /** Spec-only fields that must never leak into a legacy provider manifest. */
 const portableBase = () => {
@@ -77,6 +90,22 @@ function legacyMcpConfig() {
                 { ...server, enabled: true },
             ]),
         ),
+    };
+}
+
+/**
+ * Legacy Codex overlay. Emitted at the repo root AND inside the bundle so both
+ * Codex entry points report the same version; the root copy previously had no
+ * generator and silently drifted a release behind.
+ */
+function codexManifest() {
+    return {
+        ...portableBase(),
+        description: "Dodo Payments tools for Codex: integration skills + API/docs MCP servers.",
+        keywords: keywordsFor("codex"),
+        skills: "./skills/",
+        mcpServers: "./.mcp.json",
+        interface: codexInterface(),
     };
 }
 
@@ -129,16 +158,18 @@ const artifacts = {
     // See .omo/plans/agent-plugins-v1-migration.md experiments E-C / E-D.
     ".agents/plugins/marketplace.json": {
         name,
-        interface: { displayName: plugin.extensions["com.openai"].interface.displayName },
+        interface: { displayName: codexInterface().displayName },
         plugins: [
             {
                 name,
                 source: { source: "local", path: `./${BUNDLE}` },
                 policy: { installation: "AVAILABLE", authentication: "ON_INSTALL" },
-                category: plugin.extensions["com.openai"].interface.category,
+                category: codexInterface().category,
             },
         ],
     },
+
+    ".codex-plugin/plugin.json": codexManifest(),
 
     // ---- Codex bundle ------------------------------------------------------
     // Self-contained copy so the bundle is valid whether Codex resolves it as an
@@ -146,14 +177,7 @@ const artifacts = {
     [`${BUNDLE}/plugin.json`]: plugin,
     [`${BUNDLE}/mcp.json`]: mcp,
     [`${BUNDLE}/.mcp.json`]: legacyMcpConfig(),
-    [`${BUNDLE}/.codex-plugin/plugin.json`]: {
-        ...portableBase(),
-        description: "Dodo Payments tools for Codex: integration skills + API/docs MCP servers.",
-        keywords: keywordsFor("codex"),
-        skills: "./skills/",
-        mcpServers: "./.mcp.json",
-        interface: plugin.extensions["com.openai"].interface,
-    },
+    [`${BUNDLE}/.codex-plugin/plugin.json`]: codexManifest(),
 
     // ---- Legacy MCP config -------------------------------------------------
     ".mcp.json": legacyMcpConfig(),
@@ -192,8 +216,11 @@ function syncTree(srcRel, destRel) {
         const actual = existsSync(dest) ? listFiles(dest) : [];
         const missing = expected.filter((f) => !actual.includes(f));
         const stale = actual.filter((f) => !expected.includes(f));
+        // Byte comparison, not UTF-8: assets/ may hold binaries, and decoding
+        // those as text collapses invalid sequences to U+FFFD, so two different
+        // files can compare equal and real drift passes --check.
         const differing = expected.filter(
-            (f) => actual.includes(f) && readFileSync(join(src, f), "utf8") !== readFileSync(join(dest, f), "utf8"),
+            (f) => actual.includes(f) && Buffer.compare(readFileSync(join(src, f)), readFileSync(join(dest, f))) !== 0,
         );
         for (const f of [...missing, ...stale, ...differing]) {
             console.error(`drift: ${destRel}/${f}`);

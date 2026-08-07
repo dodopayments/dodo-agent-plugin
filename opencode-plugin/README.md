@@ -6,7 +6,11 @@ This package is part of [`dodopayments/dodo-agent-plugin`](https://github.com/do
 
 ## Install
 
-Add to your `opencode.json`:
+Install the package into your project, then add it to `opencode.json`:
+
+```bash
+npm install --save-dev @dodopayments/opencode-plugin
+```
 
 ```jsonc
 {
@@ -21,7 +25,8 @@ Add to your `opencode.json`:
 Restart OpenCode.
 
 - Both MCP servers are registered automatically via the plugin's `config` hook.
-- The `skills.paths` entry is what makes the seventeen skills visible. OpenCode builds its skill index before plugin `config` hooks run, so a plugin cannot register its own bundled skills on current versions. The plugin registers its path through both the `config` hook and the v2 `skill.transform` API, so this line becomes redundant once OpenCode applies either during startup.
+- The `skills.paths` entry is what makes the seventeen skills visible - OpenCode does not scan installed packages for skills. The path resolves against the **project** directory, not OpenCode's plugin cache, which is why the local install above is required. An absolute path works too and avoids that requirement.
+- The plugin deliberately does not set `config.skills` from its `config` hook: on OpenCode 1.18.15 that makes OpenCode drop the plugin's entire config contribution, taking the MCP servers with it.
 - The first call to `dodopayments-api` opens a browser for OAuth. `dodo-knowledge` needs no auth.
 
 Verify the install:

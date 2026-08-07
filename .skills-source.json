@@ -12,5 +12,25 @@
             "to": "dodo-best-practices",
             "reason": "Agent Plugins requires the skill directory name to match the SKILL.md frontmatter `name`. Upstream ships name: dodo-best-practices in a directory named best-practices. Renaming the directory (rather than the frontmatter) keeps the user-visible skill name unchanged. Track removal via an upstream rename in dodopayments/skills."
         }
+    ],
+    "//skills": "Explicit expected skill set. scripts/conformance.mjs asserts skills/ matches this exactly, so an upstream addition or removal surfaces as a reviewable diff here instead of a silently changed count.",
+    "skills": [
+        "better-auth-integration",
+        "billing-sdk",
+        "checkout-integration",
+        "credit-based-billing",
+        "customer-management",
+        "discounts-and-promotions",
+        "dodo-best-practices",
+        "framework-adapters",
+        "license-keys",
+        "localized-pricing",
+        "mobile-checkout",
+        "product-catalog-management",
+        "refunds-and-disputes",
+        "subscription-integration",
+        "testing-and-go-live",
+        "usage-based-billing",
+        "webhook-integration"
     ]
 }

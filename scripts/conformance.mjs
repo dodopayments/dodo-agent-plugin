@@ -14,7 +14,7 @@
  */
 
 import { readFileSync, readdirSync, lstatSync, existsSync, realpathSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, resolve, relative, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -36,8 +36,20 @@ const SERVER_KEYS = {
 const NAME_RE = /^(?!.*(?:--|\.\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
 const RESERVED_ENV = new Set(["PLUGIN_ROOT", "PLUGIN_DATA"]);
 
-/** Expected skill count. A drop here is the silent failure this file exists to catch. */
-const EXPECTED_SKILLS = 17;
+/**
+ * The expected skill set is an explicit list in .skills-source.json, not a
+ * magic number: an upstream addition or removal then shows up as a reviewable
+ * diff in that file, while an unintended drop still fails the build.
+ */
+const EXPECTED_SKILL_NAMES = JSON.parse(
+    readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", ".skills-source.json"), "utf8"),
+).skills;
+
+/** True when `child` is inside `parent`, by path boundary rather than string prefix. */
+const contains = (parent, child) => {
+    const rel = relative(parent, child);
+    return rel !== "" && !rel.startsWith("..") && !isAbsolute(rel);
+};
 
 const failures = [];
 const checks = [];
@@ -120,10 +132,17 @@ if (existsSync(skillsDir)) {
     const dirs = entries.filter((e) => lstatSync(join(skillsDir, e)).isDirectory() && !symlinks.includes(e));
 
     // The load-bearing assertion. Silent skill loss is undetectable any other way.
+    const missing = EXPECTED_SKILL_NAMES.filter((s) => !dirs.includes(s));
+    const unexpected = dirs.filter((s) => !EXPECTED_SKILL_NAMES.includes(s));
     check(
-        `skills/ contains exactly ${EXPECTED_SKILLS} skills`,
-        dirs.length === EXPECTED_SKILLS,
-        `found ${dirs.length}`,
+        `skills/ matches the ${EXPECTED_SKILL_NAMES.length} skills declared in .skills-source.json`,
+        missing.length === 0 && unexpected.length === 0,
+        [
+            missing.length ? `missing: ${missing.join(", ")}` : "",
+            unexpected.length ? `undeclared: ${unexpected.join(", ")}` : "",
+        ]
+            .filter(Boolean)
+            .join(" | "),
     );
     check(
         "skills/ contains zero symlinks (a plain git clone must resolve them)",
@@ -139,7 +158,7 @@ if (existsSync(skillsDir)) {
         if (!existsSync(manifest)) continue;
 
         // Containment: nothing may resolve outside the plugin root.
-        check(`skills/${skill} stays inside the plugin root`, realpathSync(skillPath).startsWith(resolve(ROOT)));
+        check(`skills/${skill} stays inside the plugin root`, contains(resolve(ROOT), realpathSync(skillPath)));
 
         const body = readFileSync(manifest, "utf8");
         const frontmatter = body.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -187,4 +206,6 @@ if (failures.length > 0) {
 }
 
 console.log(`PASS  ${checks.length} conformance checks (Agent Plugins ${SPEC})`);
-console.log(`      ${EXPECTED_SKILLS} skills, ${Object.keys(mcp.mcpServers).length} MCP servers, v${plugin.version}`);
+console.log(
+    `      ${EXPECTED_SKILL_NAMES.length} skills, ${Object.keys(mcp.mcpServers).length} MCP servers, v${plugin.version}`,
+);

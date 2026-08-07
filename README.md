@@ -87,7 +87,11 @@ OpenCode distributes via npm. Add the plugin to your `opencode.json`:
 
 Restart OpenCode. Both MCP servers (`dodopayments-api`, `dodo-knowledge`) are registered automatically via the plugin's `config` hook. No manual `mcp` block required.
 
-**Skills need one extra line.** OpenCode builds its skill index before plugin `config` hooks run, so a plugin cannot register its own bundled skills on current versions. Point OpenCode at the package's `skills/` directory:
+**Skills need the package installed locally plus one extra line.** OpenCode does not scan installed packages for skills, so point it at the package's `skills/` directory yourself. `skills.paths` entries resolve against the project directory, so the package must be present in the project's `node_modules` - OpenCode's own plugin cache is not the same location:
+
+```bash
+npm install --save-dev @dodopayments/opencode-plugin
+```
 
 ```jsonc
 {
@@ -99,9 +103,11 @@ Restart OpenCode. Both MCP servers (`dodopayments-api`, `dodo-knowledge`) are re
 }
 ```
 
-Verify with `opencode run "List every skill available to you by name."` - you should see all seventeen.
+An absolute path works too, and avoids the local-install requirement.
 
-> Versions before 0.5.0 documented these skills as auto-discovered. They were not: nothing in OpenCode scans an installed package, so OpenCode users had MCP servers but no skills. The plugin now also registers its skills path through both the `config` hook and the v2 `skill.transform` API, so the explicit `skills.paths` entry above becomes redundant as soon as OpenCode applies either during startup. Tracking: [`skills` discovery for npm plugins](https://opencode.ai/docs/skills).
+Verify with `opencode run "List every skill available to you by name."` - you should see all seventeen. A skills path that does not exist is ignored silently, so check rather than assume.
+
+> Versions before 0.5.0 documented these skills as auto-discovered. They were not: nothing in OpenCode scans an installed package, so OpenCode users had MCP servers but no skills. The plugin deliberately does not set `config.skills` from its `config` hook - doing so makes OpenCode 1.18.15 drop the plugin's entire config contribution, taking the MCP servers with it.
 
 If you prefer the local stdio API server with your own API key instead of the default remote OAuth server, declare `dodopayments-api` yourself in `opencode.json` - your entry wins over the plugin default:
 

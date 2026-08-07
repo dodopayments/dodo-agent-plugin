@@ -61,6 +61,17 @@ jobs:
                      '.commit = $sha | .syncedAt = $date' .skills-source.json > "$tmp"
                   mv "$tmp" .skills-source.json
 
+            # The declared skill set must track upstream, otherwise conformance
+            # fails on exactly the change worth reviewing (an added or removed
+            # skill) and no PR is ever opened. Drift shows up as a diff here.
+            - name: Refresh the declared skill set
+              run: |
+                  set -euo pipefail
+                  tmp=$(mktemp)
+                  jq --argjson s "$(ls skills | jq -R . | jq -s .)" '.skills = $s' .skills-source.json > "$tmp"
+                  mv "$tmp" .skills-source.json
+                  jq -r '"declared skills: \(.skills | length)"' .skills-source.json
+
             - name: Rebuild generated artifacts
               run: node scripts/build.mjs
 
@@ -68,8 +79,14 @@ jobs:
               run: node scripts/conformance.mjs
 
             - name: Open a pull request
-              uses: peter-evans/create-pull-request@v6
+              uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
               with:
+                  # A PAT (or App token) is required: pull requests opened with the
+                  # default GITHUB_TOKEN do not trigger `pull_request` workflows, and
+                  # skills/ changes almost exclusively arrive through this job - the
+                  # PRs that most need the Verify gate. Falls back to GITHUB_TOKEN so
+                  # the sync still runs unattended if the secret is absent.
+                  token: ${{ secrets.SYNC_PAT || secrets.GITHUB_TOKEN }}
                   branch: chore/sync-skills
                   title: "chore: sync skills from upstream"
                   body: |
@@ -77,7 +94,11 @@ jobs:
 
                       Upstream commit: `${{ steps.upstream.outputs.sha }}`
 
-                      Declared transforms in `.skills-source.json` were replayed, and
-                      `scripts/conformance.mjs` passed before this PR was opened.
+                      Declared transforms in `.skills-source.json` were replayed, the
+                      declared skill set was refreshed, and `scripts/conformance.mjs`
+                      passed before this PR was opened.
+
+                      Review the `.skills-source.json` `skills` diff: any addition or
+                      removal there is a real upstream change, not drift.
                   commit-message: "chore: sync skills from upstream"
                   delete-branch: true
