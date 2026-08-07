@@ -79,6 +79,29 @@ jobs:
             - name: Rebuild generated artifacts
               run: node scripts/build.mjs
 
+            # syncedAt is written unconditionally, so a week in which upstream
+            # did not move still leaves a one-line diff - enough for
+            # create-pull-request to open a PR that proposes nothing. That is
+            # the same weekly noise the --indent 4 fix above removed, just
+            # smaller. Revert it, but only when syncedAt is the *only* thing
+            # that moved, so a real sync still records an accurate date.
+            #
+            # Note this is invisible to a same-day replay of this job: syncedAt
+            # is already today's date, so the write is a no-op and the tree
+            # looks clean regardless. Reproduce it by passing a later date.
+            - name: Ignore a syncedAt-only bump
+              run: |
+                  set -euo pipefail
+                  others=$(git status --porcelain --untracked-files=all -- . ':(exclude).skills-source.json')
+                  before=$(git show HEAD:.skills-source.json | jq -S 'del(.syncedAt)')
+                  after=$(jq -S 'del(.syncedAt)' .skills-source.json)
+                  if [ -z "$others" ] && [ "$before" = "$after" ]; then
+                      git checkout HEAD -- .skills-source.json
+                      echo "upstream unchanged - reverted the syncedAt-only bump; no PR will be opened"
+                  else
+                      echo "real change detected - keeping the syncedAt bump"
+                  fi
+
             - name: Verify conformance before proposing the change
               run: node scripts/conformance.mjs
 

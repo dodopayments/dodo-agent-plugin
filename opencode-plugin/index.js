@@ -13,6 +13,13 @@
 // below silently vanish. Verified on 1.18.15 - adding a single named object
 // export drops both servers.
 //
+// To re-verify that claim, overwrite the module inside OpenCode's own package
+// cache (~/.cache/opencode/packages/.../node_modules/@dodopayments/...).
+// Editing this checkout, or the project's node_modules, proves nothing:
+// OpenCode resolves the package from that cache and keeps running whatever the
+// registry last published. It does so silently, so the run still looks valid -
+// this has already invalidated two separate bisections of the bug above.
+//
 // Skills are pointed at via `skills.paths` in the user's own opencode.json -
 // see this package's README. Setting `config.skills` from this hook is not a
 // substitute: it never registered skills on any tested version, because the
