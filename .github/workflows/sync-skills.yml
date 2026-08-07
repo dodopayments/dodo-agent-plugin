@@ -56,8 +56,11 @@ jobs:
                       fi
                     done
 
+                  # --indent 4 matches the repo's formatting. jq defaults to 2,
+                  # which would rewrite the whole file on every run and open a
+                  # pure-whitespace PR each week even when nothing changed.
                   tmp=$(mktemp)
-                  jq --arg sha "$UPSTREAM_SHA" --arg date "$(date -u +%Y-%m-%d)" \
+                  jq --indent 4 --arg sha "$UPSTREAM_SHA" --arg date "$(date -u +%Y-%m-%d)" \
                      '.commit = $sha | .syncedAt = $date' .skills-source.json > "$tmp"
                   mv "$tmp" .skills-source.json
 
@@ -68,7 +71,8 @@ jobs:
               run: |
                   set -euo pipefail
                   tmp=$(mktemp)
-                  jq --argjson s "$(ls skills | jq -R . | jq -s .)" '.skills = $s' .skills-source.json > "$tmp"
+                  jq --indent 4 --argjson s "$(ls skills | jq -R . | jq -s .)" \
+                     '.skills = $s' .skills-source.json > "$tmp"
                   mv "$tmp" .skills-source.json
                   jq -r '"declared skills: \(.skills | length)"' .skills-source.json
 
