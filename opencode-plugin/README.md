@@ -26,7 +26,7 @@ Restart OpenCode.
 
 - Both MCP servers are registered automatically via the plugin's `config` hook.
 - The `skills.paths` entry is what makes the seventeen skills visible - OpenCode does not scan installed packages for skills. The path resolves against the **project** directory, not OpenCode's plugin cache, which is why the local install above is required. An absolute path works too and avoids that requirement.
-- The plugin deliberately does not set `config.skills` from its `config` hook: on OpenCode 1.18.15 that makes OpenCode drop the plugin's entire config contribution, taking the MCP servers with it.
+- The plugin module exports only its default function. OpenCode's loader throws `Plugin export is not a function` on any non-function named export, skips the plugin, and swallows the error - leaving you with no MCP servers. Verified on OpenCode 1.18.15.
 - The first call to `dodopayments-api` opens a browser for OAuth. `dodo-knowledge` needs no auth.
 
 Verify the install:

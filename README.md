@@ -107,7 +107,7 @@ An absolute path works too, and avoids the local-install requirement.
 
 Verify with `opencode run "List every skill available to you by name."` - you should see all seventeen. A skills path that does not exist is ignored silently, so check rather than assume.
 
-> Versions before 0.5.0 documented these skills as auto-discovered. They were not: nothing in OpenCode scans an installed package, so OpenCode users had MCP servers but no skills. The plugin deliberately does not set `config.skills` from its `config` hook - doing so makes OpenCode 1.18.15 drop the plugin's entire config contribution, taking the MCP servers with it.
+> Versions before 0.5.0 documented these skills as auto-discovered. They were not: nothing in OpenCode scans an installed package, so OpenCode users had MCP servers but no skills. Setting `config.skills` from the plugin's `config` hook does not fix this either - the skill index is built before `config` hooks run, so it never registers anything.
 
 If you prefer the local stdio API server with your own API key instead of the default remote OAuth server, declare `dodopayments-api` yourself in `opencode.json` - your entry wins over the plugin default:
 

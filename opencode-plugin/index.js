@@ -6,10 +6,17 @@
  * @typedef {import("@opencode-ai/plugin").Plugin} Plugin
  */
 
-// This hook deliberately does NOT touch `config.skills`. Assigning it here
-// makes OpenCode 1.18.15 drop the plugin's entire config contribution, so the
-// MCP servers below silently vanish. Skills are pointed at via `skills.paths`
-// in the user's own opencode.json instead - see this package's README.
+// This module must export NOTHING but the default function. OpenCode's loader
+// falls through to `getLegacyPlugins(mod)`, which iterates `Object.values(mod)`
+// and throws `Plugin export is not a function` on any non-function export. The
+// failure is swallowed: the plugin is skipped entirely and the MCP servers
+// below silently vanish. Verified on 1.18.15 - adding a single named object
+// export drops both servers.
+//
+// Skills are pointed at via `skills.paths` in the user's own opencode.json -
+// see this package's README. Setting `config.skills` from this hook is not a
+// substitute: it never registered skills on any tested version, because the
+// skill index is built before `config` hooks run.
 //
 // Nullish-assign (`??=`) lets users override any entry by declaring the
 // same MCP key in their own opencode.json.
