@@ -54,10 +54,14 @@ jobs:
               run: |
                   npm pack --silent >/dev/null
                   packed=$(tar -tzf dodopayments-opencode-plugin-*.tgz | grep -c 'package/skills/.*/SKILL\.md')
+                  rm -f dodopayments-opencode-plugin-*.tgz
                   echo "packed skills: $packed"
                   test "$packed" = "17" || { echo "::error::npm payload has $packed skills, expected 17"; exit 1; }
 
-            - name: Working tree is clean after packing
+            # Packing used to swap skills/ between symlinks and real directories
+            # via prepack/postpack. Those hooks are gone; this asserts they stay gone.
+            - name: Packing does not mutate tracked files
               run: |
-                  git status --porcelain
-                  test -z "$(git status --porcelain)" || { echo "::error::pack mutated the working tree"; exit 1; }
+                  changed=$(git status --porcelain --untracked-files=no)
+                  echo "$changed"
+                  test -z "$changed" || { echo "::error::pack mutated tracked files"; exit 1; }
