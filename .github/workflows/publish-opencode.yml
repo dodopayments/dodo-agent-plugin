@@ -17,10 +17,8 @@ jobs:
             contents: read
             id-token: write
         steps:
-            - name: Checkout (with skills submodule)
+            - name: Checkout
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
@@ -28,8 +26,11 @@ jobs:
                   node-version: "20"
                   registry-url: "https://registry.npmjs.org"
 
-            - name: Verify manifests are in sync
-              run: node scripts/sync-manifests.mjs --check
+            - name: Verify generated artifacts are in sync
+              run: node scripts/build.mjs --check
+
+            - name: Verify Agent Plugins conformance
+              run: node scripts/conformance.mjs
 
             - name: Verify package contents (dry pack)
               run: npm pack --dry-run

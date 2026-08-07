@@ -1,0 +1,63 @@
+name: Verify
+
+# The previous setup only gated on release, so generated artifacts could drift
+# on main undetected. Agent Plugins failure semantics are silent - a malformed
+# skills/ directory still installs cleanly and simply serves no skills - so
+# these checks run on every change.
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+permissions:
+    contents: read
+
+jobs:
+    verify:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Generated artifacts are in sync with plugin.json
+              run: node scripts/build.mjs --check
+
+            - name: Agent Plugins v1.0.0 conformance
+              run: node scripts/conformance.mjs
+
+            - name: Validate plugin.json against the published schema
+              run: |
+                  curl -fsSL https://agent-plugins.org/schemas/1.0.0/plugin.schema.json -o /tmp/plugin.schema.json
+                  npx -y ajv-cli@5 validate --spec=draft2020 -s /tmp/plugin.schema.json -d plugin.json
+                  npx -y ajv-cli@5 validate --spec=draft2020 -s /tmp/plugin.schema.json -d plugins/dodopayments/plugin.json
+
+            - name: Validate mcp.json against the published schema
+              run: |
+                  curl -fsSL https://agent-plugins.org/schemas/1.0.0/mcp.schema.json -o /tmp/mcp.schema.json
+                  npx -y ajv-cli@5 validate --spec=draft2020 -s /tmp/mcp.schema.json -d mcp.json
+                  npx -y ajv-cli@5 validate --spec=draft2020 -s /tmp/mcp.schema.json -d plugins/dodopayments/mcp.json
+
+            - name: A plain clone (no submodules) resolves every skill
+              run: |
+                  count=$(find skills -maxdepth 2 -name SKILL.md -type f | wc -l | tr -d ' ')
+                  links=$(find skills -maxdepth 1 -mindepth 1 -type l | wc -l | tr -d ' ')
+                  echo "SKILL.md files: $count, symlinks: $links"
+                  test "$count" = "17" || { echo "::error::expected 17 skills, found $count"; exit 1; }
+                  test "$links" = "0"  || { echo "::error::skills/ must not contain symlinks"; exit 1; }
+
+            - name: npm package ships every skill
+              run: |
+                  npm pack --silent >/dev/null
+                  packed=$(tar -tzf dodopayments-opencode-plugin-*.tgz | grep -c 'package/skills/.*/SKILL\.md')
+                  echo "packed skills: $packed"
+                  test "$packed" = "17" || { echo "::error::npm payload has $packed skills, expected 17"; exit 1; }
+
+            - name: Working tree is clean after packing
+              run: |
+                  git status --porcelain
+                  test -z "$(git status --porcelain)" || { echo "::error::pack mutated the working tree"; exit 1; }

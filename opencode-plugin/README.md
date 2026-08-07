@@ -11,19 +11,28 @@ Add to your `opencode.json`:
 ```jsonc
 {
     "$schema": "https://opencode.ai/config.json",
-    "plugin": ["@dodopayments/opencode-plugin"]
+    "plugin": ["@dodopayments/opencode-plugin"],
+    "skills": {
+        "paths": ["node_modules/@dodopayments/opencode-plugin/skills"]
+    }
 }
 ```
 
-Restart OpenCode. That's it.
+Restart OpenCode.
 
 - Both MCP servers are registered automatically via the plugin's `config` hook.
-- The seventeen skills are auto-discovered from this package's `skills/` directory.
+- The `skills.paths` entry is what makes the seventeen skills visible. OpenCode builds its skill index before plugin `config` hooks run, so a plugin cannot register its own bundled skills on current versions. The plugin registers its path through both the `config` hook and the v2 `skill.transform` API, so this line becomes redundant once OpenCode applies either during startup.
 - The first call to `dodopayments-api` opens a browser for OAuth. `dodo-knowledge` needs no auth.
+
+Verify the install:
+
+```bash
+opencode run "List every skill available to you by name."
+```
 
 ## What you get
 
-Seventeen agent skills (auto-loaded when relevant): `best-practices`, `framework-adapters`, `testing-and-go-live`, `checkout-integration`, `subscription-integration`, `mobile-checkout`, `webhook-integration`, `credit-based-billing`, `usage-based-billing`, `license-keys`, `product-catalog-management`, `discounts-and-promotions`, `localized-pricing`, `customer-management`, `refunds-and-disputes`, `billing-sdk`, `better-auth-integration`.
+Seventeen agent skills (auto-loaded when relevant): `dodo-best-practices`, `framework-adapters`, `testing-and-go-live`, `checkout-integration`, `subscription-integration`, `mobile-checkout`, `webhook-integration`, `credit-based-billing`, `usage-based-billing`, `license-keys`, `product-catalog-management`, `discounts-and-promotions`, `localized-pricing`, `customer-management`, `refunds-and-disputes`, `billing-sdk`, `better-auth-integration`.
 
 Two MCP servers (registered automatically):
 

@@ -1,10 +1,20 @@
 // @dodopayments/opencode-plugin
-// Registers Dodo Payments MCP servers via OpenCode's `config` hook.
+// Registers Dodo Payments skills and MCP servers via OpenCode's `config` hook.
 // @see https://opencode.ai/docs/plugins
+
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 /**
  * @typedef {import("@opencode-ai/plugin").Plugin} Plugin
  */
+
+// OpenCode scans six fixed skill locations, none inside an installed package,
+// so a bundled skills/ directory is never found on its own. Must resolve from
+// import.meta.url, not the consumer's node_modules: OpenCode installs plugins
+// with Bun into ~/.cache/opencode/node_modules/.
+// @see https://opencode.ai/docs/skills
+const SKILLS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..", "skills");
 
 // Nullish-assign (`??=`) lets users override any entry by declaring the
 // same MCP key in their own opencode.json.
@@ -39,6 +49,12 @@ function isDisabled(envVarName) {
 /** @type {Plugin} */
 const dodopayments = async () => ({
     config: async (config) => {
+        config.skills ??= {};
+        config.skills.paths ??= [];
+        if (!config.skills.paths.includes(SKILLS_DIR)) {
+            config.skills.paths.push(SKILLS_DIR);
+        }
+
         config.mcp ??= {};
         for (const [name, entry] of Object.entries(DODO_MCP_SERVERS)) {
             if (isDisabled(DISABLE_FLAGS[name])) continue;
@@ -46,5 +62,18 @@ const dodopayments = async () => ({
         }
     },
 });
+
+// Skills need the v2 registration API as well: on some OpenCode versions the
+// skill index is built before v1 `config` hooks run, so the mutation above is
+// applied too late and the bundled skills never appear. Registering through
+// `skill.transform` is how OpenCode registers its own built-in skills.
+export const skills = {
+    id: "dodopayments-skills",
+    setup: async (context) => {
+        await context.skill.transform((draft) => {
+            draft.source({ type: "directory", path: SKILLS_DIR });
+        });
+    },
+};
 
 export default dodopayments;

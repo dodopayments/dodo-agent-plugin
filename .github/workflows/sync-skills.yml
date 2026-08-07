@@ -1,0 +1,83 @@
+name: Sync skills from upstream
+
+# skills/ is vendored as real files (not a submodule) so that a plain
+# `git clone` yields a working plugin. This job keeps the vendored copy fresh
+# and makes staleness visible as an open PR instead of invisible drift.
+on:
+    schedule:
+        - cron: "0 6 * * 1"
+    workflow_dispatch:
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    sync:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Fetch upstream skills
+              id: upstream
+              run: |
+                  repo=$(jq -r '.repository' .skills-source.json)
+                  branch=$(jq -r '.branch' .skills-source.json)
+                  subdir=$(jq -r '.path' .skills-source.json)
+                  git clone --depth 1 --branch "$branch" "$repo" /tmp/upstream
+                  sha=$(git -C /tmp/upstream rev-parse HEAD)
+                  echo "sha=$sha" >> "$GITHUB_OUTPUT"
+                  echo "subdir=$subdir" >> "$GITHUB_OUTPUT"
+
+            - name: Apply vendoring transforms
+              env:
+                  UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+                  SUBDIR: ${{ steps.upstream.outputs.subdir }}
+              run: |
+                  set -euo pipefail
+                  rm -rf skills && mkdir -p skills
+                  cp -RL "/tmp/upstream/${SUBDIR}/." skills/
+
+                  # Replay every declared transform so the vendored tree is a
+                  # deterministic function of upstream, never a manual edit.
+                  jq -c '.transforms[]? | select(.type == "rename")' .skills-source.json |
+                    while read -r t; do
+                      from=$(echo "$t" | jq -r '.from')
+                      to=$(echo "$t" | jq -r '.to')
+                      if [ -d "skills/$from" ]; then
+                        mv "skills/$from" "skills/$to"
+                        echo "renamed $from -> $to"
+                      fi
+                    done
+
+                  tmp=$(mktemp)
+                  jq --arg sha "$UPSTREAM_SHA" --arg date "$(date -u +%Y-%m-%d)" \
+                     '.commit = $sha | .syncedAt = $date' .skills-source.json > "$tmp"
+                  mv "$tmp" .skills-source.json
+
+            - name: Rebuild generated artifacts
+              run: node scripts/build.mjs
+
+            - name: Verify conformance before proposing the change
+              run: node scripts/conformance.mjs
+
+            - name: Open a pull request
+              uses: peter-evans/create-pull-request@v6
+              with:
+                  branch: chore/sync-skills
+                  title: "chore: sync skills from upstream"
+                  body: |
+                      Automated sync of `skills/` from the upstream skills repository.
+
+                      Upstream commit: `${{ steps.upstream.outputs.sha }}`
+
+                      Declared transforms in `.skills-source.json` were replayed, and
+                      `scripts/conformance.mjs` passed before this PR was opened.
+                  commit-message: "chore: sync skills from upstream"
+                  delete-branch: true
