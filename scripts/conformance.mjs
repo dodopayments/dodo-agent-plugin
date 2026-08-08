@@ -15,7 +15,7 @@
 
 import { readFileSync, readdirSync, lstatSync, existsSync, realpathSync } from "node:fs";
 import { dirname, join, resolve, relative, isAbsolute } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SPEC = "1.0.0";
@@ -193,6 +193,75 @@ check(
     "legacy .mcp.json exposes the same server names as mcp.json",
     JSON.stringify(Object.keys(legacyMcp.mcpServers).sort()) ===
         JSON.stringify(Object.keys(mcp.mcpServers).sort()),
+);
+
+/**
+ * The OpenCode plugin registers MCP servers programmatically, in OpenCode's own
+ * config shape (`type: "local"`, `command: [...]`), so it is hand-written rather
+ * than emitted by build.mjs -- which means `--check` cannot see it drift. It is
+ * also the only MCP registration path OpenCode users get: they never read
+ * .mcp.json. A transport or hostname change applied to the generated artifacts
+ * but not here leaves that one client pointed at a stale endpoint, silently.
+ *
+ * Bind the two together: the set of Dodo endpoint URLs referenced by the plugin
+ * must equal the canonical set. Transport-agnostic on purpose -- the bridge is
+ * an OpenCode-side detail, the endpoint is not.
+ */
+const dodoUrlsIn = (text) =>
+    new Set(
+        [...text.matchAll(/https:\/\/([A-Za-z0-9.-]+)(\/[^\s"'`,)]*)?/g)]
+            .filter((m) => m[1].toLowerCase().endsWith("dodopayments.com"))
+            .map((m) => `https://${m[1]}${m[2] ?? ""}`),
+    );
+
+const canonicalUrls = dodoUrlsIn(JSON.stringify(mcp.mcpServers));
+
+// Drive the real `config` hook rather than scanning the source: a URL sitting in
+// a comment would satisfy a text scan while the shipped config stayed stale.
+// The disable flags are cleared first so a developer's shell cannot make this
+// pass by registering fewer servers.
+const savedFlags = {};
+for (const flag of ["DODO_DISABLE_API_MCP", "DODO_DISABLE_KNOWLEDGE_MCP"]) {
+    savedFlags[flag] = process.env[flag];
+    delete process.env[flag];
+}
+
+const opencodeModule = await import(
+    pathToFileURL(join(ROOT, "opencode-plugin/index.js")).href
+);
+const registered = {};
+await (await opencodeModule.default()).config(registered);
+
+for (const [flag, value] of Object.entries(savedFlags)) {
+    if (value !== undefined) process.env[flag] = value;
+}
+
+// OpenCode's loader iterates Object.values(mod) and throws on any non-function
+// export, silently skipping the whole plugin -- MCP servers included.
+check(
+    "opencode-plugin/index.js exports nothing but its default function",
+    Object.keys(opencodeModule).length === 1 && typeof opencodeModule.default === "function",
+    Object.keys(opencodeModule).join(", "),
+);
+check(
+    "opencode-plugin registers the same server names as mcp.json",
+    JSON.stringify(Object.keys(registered.mcp ?? {}).sort()) ===
+        JSON.stringify(Object.keys(mcp.mcpServers).sort()),
+    Object.keys(registered.mcp ?? {}).join(", "),
+);
+
+const opencodeUrls = dodoUrlsIn(JSON.stringify(registered.mcp ?? {}));
+const missingInOpencode = [...canonicalUrls].filter((u) => !opencodeUrls.has(u));
+const staleInOpencode = [...opencodeUrls].filter((u) => !canonicalUrls.has(u));
+check(
+    "opencode-plugin registers exactly the canonical mcp.json endpoints",
+    missingInOpencode.length === 0 && staleInOpencode.length === 0,
+    [
+        missingInOpencode.length ? `missing: ${missingInOpencode.join(", ")}` : "",
+        staleInOpencode.length ? `stale: ${staleInOpencode.join(", ")}` : "",
+    ]
+        .filter(Boolean)
+        .join(" | "),
 );
 
 check("no leftover skills-src submodule", !existsSync(join(ROOT, ".gitmodules")));

@@ -269,7 +269,7 @@ These clients load MCPs from the static `.mcp.json` shipped with the plugin. To 
         "dodopayments-api": {
             "type": "stdio",
             "command": "npx",
-            "args": ["-y", "mcp-remote@latest", "https://mcp.dodopayments.com/sse"],
+            "args": ["-y", "mcp-remote@latest", "https://mcp.dodopayments.com/mcp"],
             "enabled": false
         }
     }

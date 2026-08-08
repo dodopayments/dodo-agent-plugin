@@ -199,6 +199,8 @@ Both servers are **remote endpoints wrapped in `npx mcp-remote`** — a bridge t
 
 **Recommendation:** keep `stdio` + `mcp-remote` as the default in v0.6.0 (zero-risk parity), and run **Experiment E-G** in the verification window. If native remote transports authenticate cleanly on VS Code + Codex, switch in v0.8.0 and keep `stdio` only in the generated legacy `.mcp.json`.
 
+> **Superseded — E-G ran early and passed, so this shipped in v0.5.0, not v0.8.0.** Both endpoints serve Streamable HTTP, and the shim turned out to *suppress* the auth model rather than broker it, which inverted the risk this recommendation was hedging against. Canonical `mcp.json` uses `streamable-http` for both servers; no `sse` entry ships. See the E-G result in §4.
+
 ---
 
 ## 4. Pre-Flight Experiments (blocking — run before/within the verification window)
@@ -422,7 +424,20 @@ curl -sI -X POST -H 'Accept: application/json, text/event-stream' \
 **PASS ⇒** adopt in v0.8.0; keep `stdio` + `mcp-remote` only in the generated legacy `.mcp.json`.
 **FAIL (any client) ⇒** keep `stdio` + `mcp-remote` in canonical `mcp.json`. Prefer `streamable-http` over legacy `sse` where supported — `sse` support is **OPTIONAL** for conformant clients.
 
-**Result:** ☐ adopt ☐ keep shim — _________________
+**Result:** ☑ **ADOPTED — brought forward into v0.5.0.** Both endpoints speak Streamable HTTP natively, so the `sse` half of this experiment was moot and both servers went to `streamable-http`:
+
+```
+knowledge.dodopayments.com/mcp   200, initialize returns serverInfo, no auth
+mcp.dodopayments.com/mcp         401 + WWW-Authenticate: Bearer, resource_metadata=
+                                 /.well-known/oauth-protected-resource/mcp
+                                 both OAuth discovery endpoints 200
+```
+
+The shim was **hiding** the auth model rather than brokering it: through `mcp-remote` Codex reported both servers as `Auth: Unsupported`; natively it reports `Not logged in` and offers `codex mcp login`. That inverted D8's stated risk — native transport surfaced auth, the bridge suppressed it — so there was no reason to hold this for v0.8.0.
+
+`streamable-http` is REQUIRED for conformant clients where `sse` is OPTIONAL, so no legacy `sse` entry ships anywhere. The bridge is retained in the **generated** `.mcp.json` for Claude Code and Cursor, and in `opencode-plugin/index.js` for OpenCode, both pointed at the same canonical endpoints.
+
+**Regression found while shipping this:** `opencode-plugin/index.js` is hand-written (OpenCode has its own config shape), so `build.mjs --check` does not cover it, and the first cut of this change moved the generated artifacts to `/mcp` while leaving the OpenCode plugin on `/sse`. Since OpenCode users never read `.mcp.json`, that path was the only one they get. Fixed, and `scripts/conformance.mjs` now asserts the plugin's endpoint set equals the canonical set so generated-vs-hand-written drift fails the build.
 
 ---
 
@@ -539,7 +554,7 @@ grep -rn "sync-manifests\|bundle-codex-plugin" --include='*.json' --include='*.y
 - [ ] Delete `.codex-plugin/` — **pull forward into v0.6.0 if E-D showed double-registration**.
 - [ ] Repoint Codex marketplace `source.path` per the E-C result.
 - [ ] Delete `plugins/dodopayments/` — **only if the path change shipped in a prior release** (D2).
-- [ ] If E-G passed: switch `mcp.json` to native `sse`/`streamable-http`.
+- [x] ~~If E-G passed: switch `mcp.json` to native `sse`/`streamable-http`.~~ **Done in v0.5.0** — E-G passed early; both servers use `streamable-http`.
 - [ ] **Release notes lead with `codex plugin marketplace upgrade dodopayments`.**
 
 **Acceptance — all must pass:**
@@ -613,6 +628,8 @@ npx -y ajv-cli validate --spec=draft2020 -s /tmp/p.json -d plugin.json  # → st
 - Per-provider keywords (`claude-code`, `codex`, `cursor`) drop from canonical; re-added per-provider by the generator if desired.
 
 ### 6.2 `mcp.json` (root, hand-authored)
+
+> **Shipped shape differs — this block is the plan-time target.** E-G passed early, so both servers ship as native `streamable-http` against `/mcp` rather than the `stdio` + `mcp-remote` shown here. The `enabled`/`$schema`/single-token constraints below all still apply. See the E-G result in §4 for the shipped file.
 
 ```jsonc
 {
@@ -725,6 +742,6 @@ No official validator ships (`FUTURE_CONSIDERATIONS.md` defers it), and the spec
 | **Q2** | Confirm provider scope: add **VS Code/Copilot + Kiro** (Tier S/A), defer Gemini/Amazon Q, and **explicitly decline** Windsurf/Cline/Continue/Zed/Amp/Droid? | **Yes** — decline Tier F on the record |
 | **Q3** | Flip version source of truth `.claude-plugin/plugin.json` → root `plugin.json`? | **Yes** |
 | **Q4** | Accept a 5-release rollout (v0.5.0 → v1.0.0), or compress into fewer, riskier releases? | **5 releases** — the Codex marketplace cache alone forces a 2-release split |
-| **Q5** | Pursue D8 (drop `mcp-remote`, use native `sse`/`streamable-http`)? | **Test in the verification window**, adopt in v0.8.0 only if E-G passes |
+| **Q5** | Pursue D8 (drop `mcp-remote`, use native `sse`/`streamable-http`)? | ~~Test in the verification window, adopt in v0.8.0 only if E-G passes~~ → **Settled: adopted in v0.5.0.** E-G ran early and passed; both servers use `streamable-http`, the bridge survives only in generated legacy configs |
 | **Q6** | Who runs the empirical matrix (E-A…E-G)? Needs real installs of Codex, Cursor, VS Code, OpenCode. | Needs an owner — **this is the critical path** |
 ```
