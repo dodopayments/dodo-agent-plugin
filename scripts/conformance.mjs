@@ -207,10 +207,15 @@ check(
  * must equal the canonical set. Transport-agnostic on purpose -- the bridge is
  * an OpenCode-side detail, the endpoint is not.
  */
+// Match the apex domain or a true subdomain. A bare endsWith would also accept
+// `notdodopayments.com`, which would let a typo'd host register as canonical.
+const APEX = "dodopayments.com";
+const isDodoHost = (host) => host === APEX || host.endsWith(`.${APEX}`);
+
 const dodoUrlsIn = (text) =>
     new Set(
         [...text.matchAll(/https:\/\/([A-Za-z0-9.-]+)(\/[^\s"'`,)]*)?/g)]
-            .filter((m) => m[1].toLowerCase().endsWith("dodopayments.com"))
+            .filter((m) => isDodoHost(m[1].toLowerCase()))
             .map((m) => `https://${m[1]}${m[2] ?? ""}`),
     );
 
