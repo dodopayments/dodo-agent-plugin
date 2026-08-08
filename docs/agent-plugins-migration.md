@@ -383,7 +383,19 @@ const U$e = /^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/,          // the spec's `name` re
 
 Present in three bundles: `cursor-agent-host`, `cursor-local-agent-runtime`, `cursor-agent-exec`. Cursor implements the spec's validation, not merely its file names, and accepts either marketplace manifest as a source.
 
-`.cursor-plugin/plugin.json` is still generated as belt-and-braces for older builds; the emitter can be dropped once a Cursor version floor is worth stating. Runtime confirmation (that the agent actually lists 17 skills) still wants a human, but the support question itself is answered.
+`.cursor-plugin/plugin.json` is still generated as belt-and-braces for older builds; the emitter can be dropped once a Cursor version floor is worth stating.
+
+**Runtime check is auth-gated, not GUI-gated.** Cursor ships a headless agent CLI, `cursor-agent`, with a non-interactive `-p/--print` mode — an earlier note in this document claimed the Cursor CLI was "only an editor launcher", which was wrong. It reports `Not logged in` without credentials, so the remaining step needs a signed-in operator, not a desktop session:
+
+```bash
+git clone https://github.com/dodopayments/dodo-agent-plugin.git \
+  ~/.cursor/plugins/local/dodo-agent-plugin
+cursor-agent login          # or export CURSOR_API_KEY=...
+cursor-agent -p --output-format text \
+  "List every Dodo Payments skill available to you by name, one per line."
+```
+
+Expect 17 names, including `dodo-best-practices`.
 
 **Method note:** an earlier grep of this same bundle returned nothing and I nearly recorded "no support". It was scoped to `out/` with an over-constrained quoted pattern. Presence is evidence; absence from one narrow grep is not.
 
@@ -432,7 +444,18 @@ Consequences for this repo:
 
 It works: 17 skills from `skills/`, 2 MCP servers from `.mcp.json`. But calling VS Code a native Agent Plugins client was wrong, and the README and CHANGELOG said so. Both corrected.
 
-Runtime assertion remains unavailable: launching with `--agent-plugins-dir` and an isolated `--user-data-dir` produces logs but no agentHost/plugin channel without a signed-in Copilot session. The non-dotted `"mcp.json"` literals elsewhere in the bundle belong to the separate `.vscode/mcp.json` user feature, not the plugin loader.
+**Runtime check is auth-gated, not GUI-gated** — same as E-E. Launching with `--agent-plugins-dir` and an isolated `--user-data-dir` starts cleanly and writes logs, but no agentHost/plugin channel appears without a signed-in Copilot session:
+
+```bash
+git clone https://github.com/dodopayments/dodo-agent-plugin.git /tmp/vsplug/dodopayments
+code --user-data-dir /tmp/vsud --agent-plugins-dir /tmp/vsplug --log trace -n /tmp/vswork
+# then, signed in to Copilot: Chat view > Plugins, and ask it to list Dodo skills
+grep -riE 'dodopayments|agent.?plugin' /tmp/vsud/logs
+```
+
+Expect 17 skills and 2 MCP servers — sourced from `.claude-plugin/plugin.json` and `.mcp.json`, per the loader above, not from the spec manifests.
+
+The non-dotted `"mcp.json"` literals elsewhere in the bundle belong to the separate `.vscode/mcp.json` user feature, not the plugin loader.
 
 **Method note:** my first grep here was scoped to a single file and I concluded VS Code "never reads `mcp.json`". Widening to the whole tree disproved it. Two greps, two premature conclusions — narrow searches produce confident wrong answers.
 
