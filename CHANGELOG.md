@@ -13,6 +13,8 @@ Adopts the [Agent Plugins 1.0.0](https://agent-plugins.org/specification) specif
 ### Added
 
 - **Root `plugin.json` and `mcp.json`**, conforming to Agent Plugins 1.0.0. Clients with native support — Codex CLI, VS Code / GitHub Copilot, Kiro — load the plugin directly. Verified on Codex 0.147.0: seventeen skills, two MCP servers, with `PLUGIN_ROOT`/`PLUGIN_DATA` injected per spec.
+- **Kiro support** via the `dev.kiro` extension namespace in `plugin.json`, which is what the spec's reverse-domain namespaces are for.
+- **Gemini CLI support** via a generated `gemini-extension.json` — **MCP servers only**. Gemini has no agent-skill primitive, so the seventeen skills are not available there and both the manifest description and the README say so rather than implying parity.
 - **`scripts/conformance.mjs`**, a spec validator. The specification ships none and its failure semantics are silent, so this asserts the expected skill set explicitly (from `.skills-source.json`) rather than trusting that a passing install means a working one.
 - **`Verify` workflow** running artifact-drift and conformance checks on every pull request, not only on release, plus live JSON Schema validation against the published schemas.
 - **`sync-skills` workflow** re-syncing `skills/` from upstream weekly and opening a pull request, so staleness is visible instead of silent.
@@ -25,7 +27,8 @@ Adopts the [Agent Plugins 1.0.0](https://agent-plugins.org/specification) specif
 - **The `skills-src` submodule is gone.** Skills are vendored; upstream remains the content owner via the sync workflow.
 - **`npm pack` no longer mutates the working tree.** The `prepack`/`postpack` + `git checkout skills/` dance is removed.
 - **Codex `interface` metadata moved into `extensions["com.openai"]`**, which is what the spec's extension namespaces are for.
-- **`skills/best-practices` renamed to `skills/dodo-best-practices`** to match its frontmatter `name`, since the spec keys skills by directory. The user-visible skill name is unchanged. Recorded as a declared transform in `.skills-source.json`.
+- **`skills/best-practices` renamed to `skills/dodo-best-practices`** to match its frontmatter `name`, since the spec keys skills by directory. The user-visible skill name is unchanged. Recorded as a declared transform in `.skills-source.json`, and fixed at the source in [dodopayments/skills#7](https://github.com/dodopayments/skills/pull/7) so the transform can eventually be dropped.
+- **MCP servers now use native `streamable-http`** in `mcp.json` instead of wrapping remote endpoints in the `npx mcp-remote` stdio bridge. Both endpoints serve Streamable HTTP directly, and `dodopayments-api` advertises standard OAuth discovery, so clients broker auth themselves. This removes an `npx` subprocess and its cold start per server, per session. On Codex the shim actually hid the auth model — servers reported `Auth: Unsupported` through `mcp-remote` but report `Not logged in` natively, with `codex mcp login` available. The generated `.mcp.json` that Claude Code and Cursor read still uses the `mcp-remote` bridge, derived from the same URLs so the two cannot drift.
 
 ### Notes
 

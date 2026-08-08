@@ -76,18 +76,32 @@ const keywordsFor = (tag) => {
 };
 
 /**
- * Claude Code and Cursor read `.mcp.json` and honour an `enabled` flag.
- * `enabled` is NOT a member of the Agent Plugins closed server union
- * (verified: `additionalProperties: false` on every transport variant), and a
- * stray key silently skips the entire server entry. It therefore exists only
- * in this legacy projection, never in the canonical mcp.json.
+ * `.mcp.json` for Claude Code and Cursor, projected from the canonical config.
+ *
+ * Two deliberate differences from mcp.json:
+ *
+ * - `enabled` is NOT a member of the Agent Plugins closed server union
+ *   (verified: `additionalProperties: false` on every transport variant), and a
+ *   stray key silently skips the entire server entry, so it lives only here.
+ * - Remote transports are wrapped in the `mcp-remote` stdio bridge. The URLs are
+ *   derived from the canonical entries rather than duplicated, so the two files
+ *   cannot drift apart.
  */
 function legacyMcpConfig() {
+    const toStdio = (server) =>
+        server.type === "stdio"
+            ? server
+            : {
+                  type: "stdio",
+                  command: "npx",
+                  args: ["-y", "mcp-remote@latest", server.url],
+              };
+
     return {
         mcpServers: Object.fromEntries(
             Object.entries(mcp.mcpServers).map(([serverName, server]) => [
                 serverName,
-                { ...server, enabled: true },
+                { ...toStdio(server), enabled: true },
             ]),
         ),
     };
@@ -170,6 +184,25 @@ const artifacts = {
     },
 
     ".codex-plugin/plugin.json": codexManifest(),
+
+    // ---- Gemini CLI --------------------------------------------------------
+    // MCP servers only. Gemini has no SKILL.md primitive, and flattening
+    // seventeen skills into GEMINI.md would cost tens of thousands of tokens of
+    // always-on context. The docs say so plainly rather than implying parity.
+    "gemini-extension.json": {
+        name,
+        version,
+        description:
+            "Dodo Payments MCP servers: live API access and documentation search. Gemini CLI has no agent-skill primitive, so the seventeen skills in this plugin are not available here.",
+        mcpServers: Object.fromEntries(
+            Object.entries(mcp.mcpServers).map(([serverName, server]) => [
+                serverName,
+                server.type === "stdio"
+                    ? { command: server.command, args: server.args }
+                    : { httpUrl: server.url },
+            ]),
+        ),
+    },
 
     // ---- Codex bundle ------------------------------------------------------
     // Self-contained copy so the bundle is valid whether Codex resolves it as an

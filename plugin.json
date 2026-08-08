@@ -33,6 +33,11 @@
                     "Implement usage-based billing with meters and events."
                 ]
             }
+        },
+        "dev.kiro": {
+            "displayName": "Dodo Payments",
+            "category": "Developer Tools",
+            "description": "Seventeen Dodo Payments integration skills plus the API and documentation MCP servers."
         }
     }
 }

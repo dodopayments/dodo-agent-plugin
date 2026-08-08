@@ -64,6 +64,27 @@ Restart Cursor. The plugin loads skills from `skills/` and MCP servers from `.mc
 
 > Prior to v0.5.0 this clone produced a plugin with **no working skills**: `skills/` contained symlinks into a git submodule that a plain `git clone` does not fetch. Skills are now vendored as real files, so the command above works as documented. If you installed an earlier version, re-clone.
 
+### Kiro
+
+Kiro reads the Agent Plugins manifest natively and loads this as a Power:
+
+```bash
+git clone https://github.com/dodopayments/dodo-agent-plugin.git
+```
+
+Point Kiro at the cloned folder. Skills load from `skills/`, MCP servers from `mcp.json`, and Kiro-specific presentation comes from the `dev.kiro` extension namespace in `plugin.json`.
+
+### Gemini CLI (MCP only)
+
+Gemini CLI has no agent-skill primitive, so **only the two MCP servers are available** - the seventeen skills are not. `dodo-knowledge` still covers a good share of what the skills provide, and it stays current automatically.
+
+```bash
+git clone https://github.com/dodopayments/dodo-agent-plugin.git \
+  ~/.gemini/extensions/dodopayments
+```
+
+Restart Gemini CLI. `gemini-extension.json` at the repo root is the manifest.
+
 ### VS Code / GitHub Copilot
 
 VS Code detects Agent Plugins packages by the `$schema` in the root `plugin.json`, so no separate manifest is needed:
