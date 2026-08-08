@@ -32,7 +32,15 @@ Adopts the [Agent Plugins 1.0.0](https://agent-plugins.org/specification) specif
 
 ### Notes
 
-`plugins/dodopayments/` and `.codex-plugin/` are retained. Codex reads the root manifest natively and the generated bundle is now valid in both formats, but pruning it changes the marketplace `source.path`, and users who ran `codex plugin marketplace add` hold a cached manifest. That change and the directory deletion must land in separate releases.
+`plugins/dodopayments/` and `.codex-plugin/` are retained, deliberately.
+
+Codex reads the root manifest natively and the generated bundle is now valid in both formats. Deleting it is verified to work — with `source.path: "."` and the bundle removed entirely, Codex 0.147.0 installs seventeen skills and two MCP servers. It is still the wrong move today:
+
+- Root `plugin.json` support ([openai/codex#35105](https://github.com/openai/codex/pull/35105)) first shipped stable in **0.146.0 on 2026-07-29**, one release cycle before this changelog entry.
+- A self-referencing marketplace `source.path` was **never** accepted before **0.142.0** ([openai/codex#28771](https://github.com/openai/codex/pull/28771)); both `"."` and `"./"` were rejected outright before it.
+- Codex auto-updates only managed installs. Standard `npm`/`brew` installs require an explicit upgrade, and upstream documents no minimum-supported-version policy.
+
+So the bundle is what keeps the plugin working for anyone who has not updated in the last couple of weeks. It stays until 0.146+ adoption is safe to assume, and even then the `source.path` change and the directory deletion must land in separate releases, because users who ran `codex plugin marketplace add` hold a cached manifest and need `codex plugin marketplace upgrade`.
 
 ## 0.4.0 - 2026-08-01
 

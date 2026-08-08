@@ -304,7 +304,24 @@ codex   # → /plugins → Dodo Payments → install
 **FAIL ⇒** keep a **thin pointer directory** at `plugins/dodopayments/` (manifest only, **no duplicated skills**); do **not** restore the full bundle. Also retry with `"./"` and with the field omitted to isolate the cause.
 
 **Result:** ☑ **`"."` OK — bundle is unnecessary on Codex 0.147.0.** With `source.path: "."` and `plugins/dodopayments/` deleted entirely: `marketplace add` accepted the self-referencing path, `plugin add` installed `0.5.0`, installed root had **17 skills / 0 symlinks**, and `codex mcp list` showed **2 servers**.
-**Not acted on yet.** Passing means the bundle is unnecessary on *current* Codex, not that deletion is safe for existing users: (a) the README documents a Codex without `plugin add`, so real users are on builds possibly predating openai/codex#35105 (root-manifest support) and would lose the plugin entirely; (b) a *local* marketplace re-read the new path automatically, but real users have **Git** marketplaces and `marketplace upgrade` is Git-only — untested against a live remote. Prune in a later release, path change and deletion in separate releases.
+**Not acted on. Version floor now measured — and it is too young to prune.**
+
+The self-referencing marketplace path and the root-manifest loader are **two separate PRs that landed five weeks apart**, and the integration needs both:
+
+| Capability | PR | First stable release |
+|---|---|---|
+| marketplace `source.path: "."` resolves to repo root | [#28771](https://github.com/openai/codex/pull/28771) | **0.142.0** (2026-06-22) |
+| root `plugin.json` (Agent Plugins `$schema`) loader | [#35105](https://github.com/openai/codex/pull/35105) | **0.146.0** (2026-07-29) |
+
+Combined floor: **>= 0.146.0**, which was ten days old when this was measured.
+
+Two assumptions in the original framing were wrong:
+- `source.path: "."` was **not** always accepted. Before #28771 the resolver did an unconditional `strip_prefix("./")`, so `"."` failed the prefix check and `"./"` stripped to empty and hit an emptiness check — **both rejected**.
+- Codex does **not** broadly auto-update. The hourly update loop is scoped to managed installs; `npm`/`brew` users upgrade manually, and upstream documents no minimum-supported-version policy.
+
+So the bundle is what keeps the plugin working for anyone who has not updated in roughly two weeks. Revisit once 0.146+ adoption is safe to assume; keep the path change and the directory deletion in separate releases regardless, because of cached marketplace manifests.
+
+Separately confirmed: `.codex-plugin/plugin.json` is still read as a fallback overlay by #35105, so retaining it is correct rather than merely harmless.
 
 ---
 
