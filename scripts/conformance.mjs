@@ -269,6 +269,32 @@ check(
         .join(" | "),
 );
 
+/**
+ * The endpoint gate above compares URLs, so it cannot see prose. Migrating the
+ * transports left user-visible text behind twice -- the Claude Code config UI
+ * still called the default a "remote SSE server", and the README said both
+ * servers were wired through mcp-remote, which is now true only of the
+ * generated compatibility manifests.
+ *
+ * Assert the narrow, self-adjusting form: if no canonical server actually uses
+ * the `sse` transport, no user-facing text may describe one. Scoped to the
+ * surfaces a user reads -- this file legitimately names `sse` as a spec variant.
+ */
+const canonicalTransports = new Set(Object.values(mcp.mcpServers).map((s) => s.type));
+if (!canonicalTransports.has("sse")) {
+    for (const rel of ["README.md", "overlays/claude.json"]) {
+        const hits = readFileSync(join(ROOT, rel), "utf8")
+            .split("\n")
+            .map((line, i) => [i + 1, line])
+            .filter(([, line]) => /\bSSE\b/.test(line));
+        check(
+            `${rel} describes no SSE server (canonical uses ${[...canonicalTransports].join(", ")})`,
+            hits.length === 0,
+            hits.map(([n]) => `line ${n}`).join(", "),
+        );
+    }
+}
+
 check("no leftover skills-src submodule", !existsSync(join(ROOT, ".gitmodules")));
 
 // --------------------------------------------------------------------- report

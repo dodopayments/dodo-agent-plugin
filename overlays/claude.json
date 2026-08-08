@@ -4,7 +4,7 @@
         "dodo_api_key": {
             "type": "string",
             "title": "Dodo Payments API Key",
-            "description": "Optional. Only required if you switch the API MCP server in .mcp.json to local stdio mode (dodopayments-mcp). The default remote SSE server authenticates via OAuth in your browser.",
+            "description": "Optional. Only required if you switch the API MCP server in .mcp.json to local stdio mode (dodopayments-mcp). The default remote server authenticates via OAuth in your browser.",
             "sensitive": true
         },
         "dodo_webhook_key": {

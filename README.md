@@ -209,11 +209,11 @@ Skills source: [`dodopayments/skills`](https://github.com/dodopayments/skills), 
 | `dodopayments-api` | Live API access (payments, subscriptions, customers, products, refunds, licenses, usage) | OAuth (browser) |
 | `dodo-knowledge` | Semantic search over the Dodo Payments documentation | None |
 
-Both servers are wired through `mcp-remote` so they run in any MCP-compatible client.
+Both servers speak Streamable HTTP. The canonical `mcp.json` declares them natively (`type: "streamable-http"`), which is what spec-native clients such as Codex CLI and Cursor use. The generated compatibility manifests — `.mcp.json`, read by Claude Code, VS Code and Cursor's legacy path — wire the same two endpoints through `mcp-remote` instead, so they run in clients that cannot yet dial Streamable HTTP directly.
 
 ## Configure (optional, Claude Code)
 
-If you prefer to run the API MCP locally with an API key instead of the remote SSE server, open `/plugins` in Claude Code, select **Dodo Payments**, and choose **Configure options**. Fill in:
+If you prefer to run the API MCP locally with an API key instead of the remote server, open `/plugins` in Claude Code, select **Dodo Payments**, and choose **Configure options**. Fill in:
 
 - `dodo_api_key` - your `dodo_test_...` or `dodo_live_...` key
 - `dodo_webhook_key` - your webhook signing secret
