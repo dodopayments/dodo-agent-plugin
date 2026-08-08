@@ -370,7 +370,7 @@ cp -R "$EXP/repo" ~/.cursor/plugins/local/dodo-agent-plugin-exp
 
 **FAIL ⇒** Cursor is **not** Tier S. Keep generating `.cursor-plugin/plugin.json` indefinitely (cost: one emitter, already planned in §7.1). Not a blocker for any release.
 
-**Result:** ☑ **Cursor IS native. Resolved by static analysis of the shipped bundle, no GUI needed.**
+**Result:** ☑ **PASS — Cursor is native, and 17 skills verified loading at runtime.**
 
 Cursor 3.14.27's agent host carries the spec's own identifiers:
 
@@ -385,17 +385,23 @@ Present in three bundles: `cursor-agent-host`, `cursor-local-agent-runtime`, `cu
 
 `.cursor-plugin/plugin.json` is still generated as belt-and-braces for older builds; the emitter can be dropped once a Cursor version floor is worth stating.
 
-**Runtime check is auth-gated, not GUI-gated.** Cursor ships a headless agent CLI, `cursor-agent`, with a non-interactive `-p/--print` mode — an earlier note in this document claimed the Cursor CLI was "only an editor launcher", which was wrong. It reports `Not logged in` without credentials, so the remaining step needs a signed-in operator, not a desktop session:
+**Runtime verified — 17 skills load in Cursor.** Confirmed headlessly via `cursor-agent`, Cursor's non-interactive agent CLI. An earlier note here called the Cursor CLI "only an editor launcher", which was wrong; the real gate was authentication, not a desktop session.
 
 ```bash
-git clone https://github.com/dodopayments/dodo-agent-plugin.git \
+git clone -b feat/agent-plugins-v1 https://github.com/dodopayments/dodo-agent-plugin.git \
   ~/.cursor/plugins/local/dodo-agent-plugin
-cursor-agent login          # or export CURSOR_API_KEY=...
-cursor-agent -p --output-format text \
-  "List every Dodo Payments skill available to you by name, one per line."
+cursor-agent login
+cd "$(mktemp -d)" && cursor-agent -p --trust --output-format text \
+  "List every Dodo Payments skill available to you, by exact skill name, one per line."
 ```
 
-Expect 17 names, including `dodo-best-practices`.
+Returned exactly the seventeen, including the renamed `dodo-best-practices`. Run from an empty scratch directory so project-local skills cannot contaminate the result.
+
+**Control, because an uncontrolled run proves nothing:** moving the plugin out of `plugins/local/` and re-running the identical prompt returns `NONE`. The skills demonstrably come from this plugin, not from `~/.cursor/skills` (which holds only an unrelated `mintlify`).
+
+MCP registered as `plugin-dodo-agent-plugin-dodo-knowledge`. `dodopayments-api` does not surface tools until `cursor-agent` completes its OAuth flow, matching the behaviour on Codex and OpenCode.
+
+**One hypothesis tested and disproved:** a second `plugin-dodopayments-*` MCP entry appears alongside ours, and the obvious suspect was the retained `plugins/dodopayments/` bundle being discovered as a nested second plugin. Removing the bundle and re-running left both entries in place, so that is not the cause. It is a stale registration persisted in Cursor's `state.vscdb` from a July install of the published plugin; only one plugin directory exists on disk. Not a defect in this repo — but worth knowing that Cursor retains MCP registrations after a plugin is gone.
 
 **Method note:** an earlier grep of this same bundle returned nothing and I nearly recorded "no support". It was scoped to `out/` with an over-constrained quoted pattern. Presence is evidence; absence from one narrow grep is not.
 
