@@ -450,16 +450,59 @@ Consequences for this repo:
 
 It works: 17 skills from `skills/`, 2 MCP servers from `.mcp.json`. But calling VS Code a native Agent Plugins client was wrong, and the README and CHANGELOG said so. Both corrected.
 
-**Runtime check is auth-gated, not GUI-gated** — same as E-E. Launching with `--agent-plugins-dir` and an isolated `--user-data-dir` starts cleanly and writes logs, but no agentHost/plugin channel appears without a signed-in Copilot session:
+**Runtime: ☑ CONFIRMED on VS Code 1.125.1 with a signed-in Copilot session.** The plugin is discovered and both MCP servers register — and `.mcp.json` demonstrably wins over root `mcp.json`.
 
-```bash
-git clone https://github.com/dodopayments/dodo-agent-plugin.git /tmp/vsplug/dodopayments
-code --user-data-dir /tmp/vsud --agent-plugins-dir /tmp/vsplug --log trace -n /tmp/vswork
-# then, signed in to Copilot: Chat view > Plugins, and ask it to list Dodo skills
-grep -riE 'dodopayments|agent.?plugin' /tmp/vsud/logs
+`--agent-plugins-dir` turned out to be the wrong lever: passing it to `code` when an instance is already running is silently **ignored**, because the launch request is handed to the existing process. Discovery is driven instead by the `chat.pluginLocations` setting, read *reactively*, so it applies to a live window with no restart. From `workbench.desktop.main.js`:
+
+```js
+async _discoverPluginSources(){
+  for (const [k,v] of Object.entries(this._pluginLocationsConfig.get())) {
+    const p = k.trim();
+    if (!p || v === false) continue;
+    for (const uri of this._resolvePluginPath(p, userHome))
+      await this._addPluginSource(e, uri, "plugin path", ...);
+  }
+}
+_resolvePluginPath(e,t){
+  if (e.startsWith("~")) e = expandHome(e,t);
+  return isAbsolute(e) ? [URI.file(e)]                       // ← plugin dir itself
+                       : workspaceFolders.map(f => join(f.uri, e));
+}
 ```
 
-Expect 17 skills and 2 MCP servers — sourced from `.claude-plugin/plugin.json` and `.mcp.json`, per the loader above, not from the spec manifests.
+So the key is a **map of path → enabled**, and an absolute path names the plugin directory itself (the multiplicity exists only to resolve *relative* paths against each workspace folder — it is not globbing). `_addPluginSource` then requires `isDirectory`.
+
+Reproduce:
+
+```jsonc
+// settings.json (user or workspace scope; targets [6,5,3,4,2,1] are all accepted)
+{ "chat.pluginLocations": { "/abs/path/to/dodo-agent-plugin": true } }
+```
+
+VS Code creates one log channel per registered MCP server, named `mcpServer.plugin.<uri-with-punctuation-stripped>.<serverName>.log`:
+
+```
+mcpServer.plugin.filetmpvsplugdodopayments.dodopayments-api.log
+mcpServer.plugin.filetmpvsplugdodopayments.dodo-knowledge.log
+```
+
+**Which manifest wins — settled by differential experiment.** Server names are observable in those channel filenames, so the two MCP files were given disjoint name prefixes in the *same* plugin directory and registered simultaneously:
+
+| Manifest | Server names | Channels created |
+|---|---|---|
+| root `mcp.json` (native `streamable-http`) | `ROOTNATIVE-*` | **none** |
+| `.mcp.json` (`mcp-remote` bridge) | `LEGACYBRIDGE-*` | **both** |
+
+Only `LEGACYBRIDGE-*` appeared. Because both files sat in one directory under identical conditions, `ROOTNATIVE-*` is a simultaneous negative control rather than a separate run. **VS Code reads `.mcp.json` and ignores root `mcp.json`**, confirming consequence (2) above empirically.
+
+Control: after removing the setting and deleting the directory, zero probe channels were touched in the following 60s — so discovery was caused by the setting, not ambient state. The probe path was synthetic and unique, which rules out collision with the pre-existing `dodopayments.sentra-code` extension's own MCP entries.
+
+**This makes the generated compat surface load-bearing, not vestigial.** Dropping `.mcp.json` on the assumption that spec-native files supersede it would silently give VS Code **zero** MCP servers — no error, no fallback to `mcp.json`.
+
+**Two gaps remain open, deliberately unclaimed:**
+
+1. **The 17-skill count is not runtime-enumerated on VS Code.** Skills emit no log channel, and grepping logs for skill names returns nothing — absence of evidence, not evidence of absence. Every other client was confirmed by direct enumeration; VS Code has MCP-level proof only. Closing it needs one chat turn ("List every Dodo Payments skill available to you") against a registered plugin.
+2. **Only the MCP half of the loader claim is proven.** That `.claude-plugin/plugin.json` shadows the root `plugin.json` remains *inferred from the static decode*, not demonstrated — the differential experiment discriminated MCP config files, not manifests. Consistent with the decode, but labelled as inference.
 
 The non-dotted `"mcp.json"` literals elsewhere in the bundle belong to the separate `.vscode/mcp.json` user feature, not the plugin loader.
 
@@ -583,16 +626,16 @@ node scripts/conformance.mjs && node scripts/sync-manifests.mjs --check   # → 
 # B5 legacy consumers unchanged
 git diff v0.5.0 --stat -- .mcp.json .claude-plugin .cursor-plugin        # → no unintended drift
 ```
-**Manual QA:** Claude Code + Codex + Cursor each still show **17 skills / 2 MCPs** (no regression), and VS Code detects the package as **Agent Plugins 1.0** (E-F).
+**Manual QA:** Claude Code + Codex + Cursor each still show **17 skills / 2 MCPs** (no regression), and VS Code loads the package — though *not* as Agent Plugins 1.0: E-F showed it takes the `.claude-plugin/` + `.mcp.json` compat branch.
 **Result:** valid Agent Plugin *and* still a valid Claude/Cursor/Codex plugin.
 
 ---
 
 ### Verification window *(no release)*
-- [ ] Run **E-C, E-D, E-E, E-F, E-G** against the `v0.6.0` tag.
-- [ ] Record every Result line in §4 and commit this file.
+- [x] Run **E-C, E-D, E-E, E-F, E-G** — all ran early, against the v0.5.0 branch rather than a `v0.6.0` tag.
+- [x] Record every Result line in §4 and commit this file.
 
-**Exit gate:** E-C and E-D have recorded outcomes (they gate v0.8.0 scope). E-E/E-F/E-G may remain open — they change scope, not safety.
+**Exit gate:** met. E-C and E-D have recorded outcomes (they gate v0.8.0 scope). E-E/E-F/E-G also ran; all five are resolved except the two gaps flagged in E-F (VS Code skill enumeration, and the manifest half of the loader claim) — both scope questions, not safety ones.
 
 ---
 
