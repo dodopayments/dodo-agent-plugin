@@ -1,7 +1,7 @@
 # Dodo Payments Agent Plugin
 
 [![License](https://img.shields.io/github/license/dodopayments/dodo-agent-plugin.svg?style=flat-square)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg?style=flat-square)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fdodopayments%2Fdodo-agent-plugin%2Fmain%2Fplugin.json&query=%24.version&label=version&color=blue&style=flat-square)](./CHANGELOG.md)
 [![npm](https://img.shields.io/npm/v/@dodopayments/opencode-plugin.svg?style=flat-square)](https://www.npmjs.com/package/@dodopayments/opencode-plugin)
 [![Discord](https://img.shields.io/discord/1305511580854779984?label=discord&style=flat-square)](https://discord.gg/bYqAp4ayYh)
 
