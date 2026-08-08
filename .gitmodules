@@ -1,4 +1,0 @@
-[submodule "skills-src"]
-	path = skills-src
-	url = https://github.com/dodopayments/skills.git
-	branch = main

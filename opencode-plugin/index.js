@@ -6,12 +6,38 @@
  * @typedef {import("@opencode-ai/plugin").Plugin} Plugin
  */
 
+// This module must export NOTHING but the default function. OpenCode's loader
+// falls through to `getLegacyPlugins(mod)`, which iterates `Object.values(mod)`
+// and throws `Plugin export is not a function` on any non-function export. The
+// failure is swallowed: the plugin is skipped entirely and the MCP servers
+// below silently vanish. Verified on 1.18.15 - adding a single named object
+// export drops both servers.
+//
+// To re-verify that claim, overwrite the module inside OpenCode's own package
+// cache (~/.cache/opencode/packages/.../node_modules/@dodopayments/...).
+// Editing this checkout, or the project's node_modules, proves nothing:
+// OpenCode resolves the package from that cache and keeps running whatever the
+// registry last published. It does so silently, so the run still looks valid -
+// this has already invalidated two separate bisections of the bug above.
+//
+// Skills are pointed at via `skills.paths` in the user's own opencode.json -
+// see this package's README. Setting `config.skills` from this hook is not a
+// substitute: it never registered skills on any tested version, because the
+// skill index is built before `config` hooks run.
+//
 // Nullish-assign (`??=`) lets users override any entry by declaring the
 // same MCP key in their own opencode.json.
+//
+// The endpoint URLs below MUST match the canonical mcp.json. This file is
+// hand-written rather than generated - OpenCode's config shape is its own
+// (`type: "local"`, `command: [...]`) - so `build.mjs --check` cannot cover
+// it. `scripts/conformance.mjs` asserts the URL sets are identical instead.
+// The `mcp-remote` bridge is deliberate here, matching the generated
+// `.mcp.json`: only the canonical mcp.json uses native streamable-http.
 const DODO_MCP_SERVERS = {
     "dodopayments-api": {
         type: "local",
-        command: ["npx", "-y", "mcp-remote@latest", "https://mcp.dodopayments.com/sse"],
+        command: ["npx", "-y", "mcp-remote@latest", "https://mcp.dodopayments.com/mcp"],
         enabled: true,
     },
     "dodo-knowledge": {

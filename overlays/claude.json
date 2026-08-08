@@ -1,23 +1,5 @@
 {
-    "name": "dodopayments",
-    "version": "0.5.0",
-    "description": "Dodo Payments tools for Claude Code, including integration agent skills and the Dodo Payments API and docs MCP servers.",
-    "author": {
-        "name": "Dodo Payments",
-        "email": "support@dodopayments.com"
-    },
-    "homepage": "https://docs.dodopayments.com",
-    "repository": "https://github.com/dodopayments/dodo-agent-plugin",
-    "license": "MIT",
-    "keywords": [
-        "dodopayments",
-        "payments",
-        "billing",
-        "subscriptions",
-        "claude-code",
-        "mcp",
-        "skills"
-    ],
+    "//": "Claude Code extras merged over the canonical plugin.json by scripts/build.mjs. Agent Plugins v1 has no portable secrets mechanism (deliberately deferred by the spec), so userConfig lives here and is emitted only into .claude-plugin/plugin.json.",
     "userConfig": {
         "dodo_api_key": {
             "type": "string",

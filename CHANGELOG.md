@@ -1,5 +1,47 @@
 # Changelog
 
+## 0.5.0 - 2026-08-07
+
+Adopts the [Agent Plugins 1.0.0](https://agent-plugins.org/specification) specification and makes every provider-specific manifest a generated artifact of one canonical source. Two defects found during the migration were already shipping.
+
+### Fixed
+
+- **The documented Cursor install shipped zero working skills.** `skills/` was seventeen symlinks into the `skills-src` git submodule, and distribution is a plain `git clone`, which does not fetch submodules. A bare clone of `0.4.0` yields 0 resolvable `SKILL.md` files and 17 dangling symlinks. Skills are now vendored as real files: the same clone yields 17 and 0. **If you installed Cursor from a clone before 0.5.0, re-clone.**
+- **The OpenCode package shipped skills nothing could discover.** OpenCode scans six fixed locations, none inside an installed package, so users got MCP servers and no skills. `skills.paths` in your own `opencode.json` is now documented and verified; see the [package README](./opencode-plugin/README.md). Setting `config.skills` from the plugin's `config` hook is not a substitute — the skill index is built before `config` hooks run. The plugin module also exports nothing but its default function: OpenCode's loader throws `Plugin export is not a function` on any non-function named export and silently skips the whole plugin, MCP servers included.
+- **`enabled` was not a legal key in a spec `mcp.json`.** The Agent Plugins server union is closed (`additionalProperties: false`), so a stray key silently skips the entire server entry. Copying `.mcp.json` verbatim would have disabled both servers. `enabled` now exists only in the generated legacy `.mcp.json`, which Claude Code and Cursor still read.
+
+### Added
+
+- **Root `plugin.json` and `mcp.json`**, conforming to Agent Plugins 1.0.0. Verified on Codex 0.147.0: seventeen skills, two MCP servers, with `PLUGIN_ROOT`/`PLUGIN_DATA` injected per spec. Cursor 3.14.27 also recognises the spec directly — its agent host carries both schema URLs and the spec's `name` regex. VS Code 1.125.1 does **not**: the `agent-plugins.org` string appears nowhere in its bundle, and it loads this repo through the generated `.claude-plugin/plugin.json` and `.mcp.json` instead. That works, and is why the compatibility manifests are still generated.
+- **Kiro support** via the `dev.kiro` extension namespace in `plugin.json`, which is what the spec's reverse-domain namespaces are for.
+- **Gemini CLI support** via a generated `gemini-extension.json` — **MCP servers only**. Gemini has no agent-skill primitive, so the seventeen skills are not available there and both the manifest description and the README say so rather than implying parity.
+- **`scripts/conformance.mjs`**, a spec validator. The specification ships none and its failure semantics are silent, so this asserts the expected skill set explicitly (from `.skills-source.json`) rather than trusting that a passing install means a working one.
+- **`Verify` workflow** running artifact-drift and conformance checks on every pull request, not only on release, plus live JSON Schema validation against the published schemas.
+- **`sync-skills` workflow** re-syncing `skills/` from upstream weekly and opening a pull request, so staleness is visible instead of silent.
+- **`.skills-source.json`** recording upstream provenance, the declared skill set, and any local transforms.
+
+### Changed
+
+- **`plugin.json` is now the version source of truth**, replacing `.claude-plugin/plugin.json`. Every provider manifest is generated from it.
+- **Three scripts collapse into one.** `scripts/build.mjs` (with `--check`) replaces `sync-manifests.mjs`, `bundle-codex-plugin.mjs`, and `build-skills-for-npm.mjs`.
+- **The `skills-src` submodule is gone.** Skills are vendored; upstream remains the content owner via the sync workflow.
+- **`npm pack` no longer mutates the working tree.** The `prepack`/`postpack` + `git checkout skills/` dance is removed.
+- **Codex `interface` metadata moved into `extensions["com.openai"]`**, which is what the spec's extension namespaces are for.
+- **`skills/best-practices` renamed to `skills/dodo-best-practices`** to match its frontmatter `name`, since the spec keys skills by directory. The user-visible skill name is unchanged. Recorded as a declared transform in `.skills-source.json`, and fixed at the source in [dodopayments/skills#7](https://github.com/dodopayments/skills/pull/7) so the transform can eventually be dropped.
+- **MCP servers now use native `streamable-http`** in `mcp.json` instead of wrapping remote endpoints in the `npx mcp-remote` stdio bridge. Both endpoints serve Streamable HTTP directly, and `dodopayments-api` advertises standard OAuth discovery, so clients broker auth themselves. This removes an `npx` subprocess and its cold start per server, per session. On Codex the shim actually hid the auth model — servers reported `Auth: Unsupported` through `mcp-remote` but report `Not logged in` natively, with `codex mcp login` available. The generated `.mcp.json` that Claude Code and Cursor read still uses the `mcp-remote` bridge, derived from the same URLs so the two cannot drift. The OpenCode plugin also keeps the bridge — its config shape is OpenCode's own, so it is hand-written rather than generated — but now points at the same canonical endpoints, and `scripts/conformance.mjs` fails the build if that ever stops being true.
+
+### Notes
+
+`plugins/dodopayments/` and `.codex-plugin/` are retained, deliberately.
+
+Codex reads the root manifest natively and the generated bundle is now valid in both formats. Deleting it is verified to work — with `source.path: "."` and the bundle removed entirely, Codex 0.147.0 installs seventeen skills and two MCP servers. It is still the wrong move today:
+
+- Root `plugin.json` support ([openai/codex#35105](https://github.com/openai/codex/pull/35105)) first shipped stable in **0.146.0 on 2026-07-29**, one release cycle before this changelog entry.
+- A self-referencing marketplace `source.path` was **never** accepted before **0.142.0** ([openai/codex#28771](https://github.com/openai/codex/pull/28771)); both `"."` and `"./"` were rejected outright before it.
+- Codex auto-updates only managed installs. Standard `npm`/`brew` installs require an explicit upgrade, and upstream documents no minimum-supported-version policy.
+
+So the bundle is what keeps the plugin working for anyone who has not updated in the last couple of weeks. It stays until 0.146+ adoption is safe to assume, and even then the `source.path` change and the directory deletion must land in separate releases, because users who ran `codex plugin marketplace add` hold a cached manifest and need `codex plugin marketplace upgrade`.
+
 ## 0.4.0 - 2026-08-01
 
 ### Added

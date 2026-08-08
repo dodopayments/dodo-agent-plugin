@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Build artifacts
+*.tgz
+
 # IDE
 .idea/
 .vscode/
@@ -22,3 +25,4 @@ Thumbs.db
 
 # Internal agent scratch
 .sisyphus/
+.omo/
