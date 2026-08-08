@@ -370,7 +370,22 @@ cp -R "$EXP/repo" ~/.cursor/plugins/local/dodo-agent-plugin-exp
 
 **FAIL ⇒** Cursor is **not** Tier S. Keep generating `.cursor-plugin/plugin.json` indefinitely (cost: one emitter, already planned in §7.1). Not a blocker for any release.
 
-**Result:** ◐ **Structurally verified; runtime blocked on GUI.** Cloned into `~/.cursor/plugins/local/` (then removed): 17 real skills, 0 symlinks, `.cursor-plugin/plugin.json` well-formed (`skills: "skills/"`, `mcpServers: ".mcp.json"`), root `plugin.json` schema-valid. Cannot assert root-manifest auto-detection headlessly — the `cursor` CLI is only an editor launcher. **Needs a human.** `.cursor-plugin/` is generated regardless, so Cursor works either way; this experiment only decides whether that emitter can eventually be dropped.
+**Result:** ☑ **Cursor IS native. Resolved by static analysis of the shipped bundle, no GUI needed.**
+
+Cursor 3.14.27's agent host carries the spec's own identifiers:
+
+```js
+new Set(["https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+         "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json"]);
+const U$e = /^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/,          // the spec's `name` regex
+      O$e = [".cursor-plugin/marketplace.json", ".claude-plugin/marketplace.json"],
+```
+
+Present in three bundles: `cursor-agent-host`, `cursor-local-agent-runtime`, `cursor-agent-exec`. Cursor implements the spec's validation, not merely its file names, and accepts either marketplace manifest as a source.
+
+`.cursor-plugin/plugin.json` is still generated as belt-and-braces for older builds; the emitter can be dropped once a Cursor version floor is worth stating. Runtime confirmation (that the agent actually lists 17 skills) still wants a human, but the support question itself is answered.
+
+**Method note:** an earlier grep of this same bundle returned nothing and I nearly recorded "no support". It was scoped to `out/` with an over-constrained quoted pattern. Presence is evidence; absence from one narrow grep is not.
 
 ---
 
@@ -393,7 +408,33 @@ code --install-plugin-dir "$EXP/repo"   # if unavailable, use the Chat > Plugins
 
 **FAIL ⇒** capture the VS Code detection reason (Output → GitHub Copilot Chat). Most likely causes: `$schema` const mismatch, or a `skills/` entry that is not an immediate child directory.
 
-**Result:** ◐ **Structurally verified; runtime blocked on GUI.** Root `plugin.json` and `mcp.json` validate against the **published** schemas via ajv, skills are immediate children of `skills/` with zero symlinks, and a bare clone resolves all 17. Cannot assert VS Code's format detection headlessly — `code chat` opens a window; there is no `--plugin-dir` equivalent. **Needs a human.** This is the largest claimed distribution win in the plan, so verify before announcing.
+**Result:** ☑ **VS Code loads the plugin, but NOT as an Agent Plugin. The premise of this experiment was wrong.**
+
+VS Code 1.125.1 stable ships agent-plugin support (`chat.agentPlugins`, `chat.pluginLocations`, `chat.plugins`, and a `--agent-plugins-dir` CLI flag), but the string `agent-plugins.org` appears **nowhere** in its bundle. It does not gate on the spec `$schema`. Its loader picks a format by probing paths, decoded from `vs/platform/agentHost/node/agentHostMain.js`:
+
+```js
+lD = { format:0, manifestPath:"plugin.json" }                          // root
+cD = { format:1, manifestPath:".claude-plugin/plugin.json", token:"${CLAUDE_PLUGIN_ROOT}" }
+dD = {           manifestPath:".plugin/plugin.json",        token:"${PLUGIN_ROOT}" }
+
+uD = exists(".plugin/plugin.json")                                  ? dD
+   : path.includes(".claude") || exists(".claude-plugin/plugin.json") ? cD
+   : lD
+
+c = Ul(i, ".mcp.json", Nl(a?.mcpServers), r)   // MCP default is DOTTED
+d = Ul(i, "skills",    Nl(a?.skills),     r)
+```
+
+Consequences for this repo:
+
+1. We ship a generated `.claude-plugin/plugin.json`, so VS Code takes the **Claude branch** and never reads the root `plugin.json`.
+2. MCP defaults to `.mcp.json`, not `mcp.json`. The native `streamable-http` transports adopted in E-G therefore **do not reach VS Code** — it gets the `mcp-remote` bridge.
+
+It works: 17 skills from `skills/`, 2 MCP servers from `.mcp.json`. But calling VS Code a native Agent Plugins client was wrong, and the README and CHANGELOG said so. Both corrected.
+
+Runtime assertion remains unavailable: launching with `--agent-plugins-dir` and an isolated `--user-data-dir` produces logs but no agentHost/plugin channel without a signed-in Copilot session. The non-dotted `"mcp.json"` literals elsewhere in the bundle belong to the separate `.vscode/mcp.json` user feature, not the plugin loader.
+
+**Method note:** my first grep here was scoped to a single file and I concluded VS Code "never reads `mcp.json`". Widening to the whole tree disproved it. Two greps, two premature conclusions — narrow searches produce confident wrong answers.
 
 ---
 

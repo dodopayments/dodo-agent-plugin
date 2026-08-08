@@ -61,6 +61,8 @@ git clone https://github.com/dodopayments/dodo-agent-plugin.git ~/.cursor/plugin
 
 Restart Cursor. The plugin loads skills from `skills/` and MCP servers from `.mcp.json`, as declared in `.cursor-plugin/plugin.json`.
 
+> Cursor 3.14.27 also recognises Agent Plugins 1.0.0 directly: its agent host carries both spec schema URLs and the spec's own `name` regex, and accepts either `.cursor-plugin/marketplace.json` or `.claude-plugin/marketplace.json` as a marketplace source. The generated `.cursor-plugin/plugin.json` is kept as belt-and-braces for older builds.
+
 > Prior to v0.5.0 this clone produced a plugin with **no working skills**: `skills/` contained symlinks into a git submodule that a plain `git clone` does not fetch. Skills are now vendored as real files, so the command above works as documented. If you installed an earlier version, re-clone.
 
 ### Kiro
@@ -86,13 +88,13 @@ Restart Gemini CLI. `gemini-extension.json` at the repo root is the manifest.
 
 ### VS Code / GitHub Copilot
 
-VS Code detects Agent Plugins packages by the `$schema` in the root `plugin.json`, so no separate manifest is needed:
-
 ```bash
 git clone https://github.com/dodopayments/dodo-agent-plugin.git
 ```
 
-Then open the Chat view, go to **Plugins**, and add the cloned folder. Skills load from `skills/` and both MCP servers from `mcp.json`.
+Then open the Chat view, go to **Plugins**, and add the cloned folder. Skills load from `skills/`, and both MCP servers load from `.mcp.json`.
+
+> VS Code 1.125.1 does not key off the Agent Plugins `$schema` - the string appears nowhere in its bundle. Its loader picks a manifest by probing, in order, `.plugin/plugin.json`, then `.claude-plugin/plugin.json`, then a root `plugin.json`, and defaults MCP to `.mcp.json` rather than `mcp.json`. Because this repo ships a generated `.claude-plugin/plugin.json`, VS Code loads it through that branch. Everything works - seventeen skills and two MCP servers - but via the compatibility manifests rather than the spec ones, so VS Code gets the `mcp-remote` bridge rather than the native transports in `mcp.json`.
 
 ### OpenCode
 

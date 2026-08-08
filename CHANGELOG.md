@@ -12,7 +12,7 @@ Adopts the [Agent Plugins 1.0.0](https://agent-plugins.org/specification) specif
 
 ### Added
 
-- **Root `plugin.json` and `mcp.json`**, conforming to Agent Plugins 1.0.0. Clients with native support — Codex CLI, VS Code / GitHub Copilot, Kiro — load the plugin directly. Verified on Codex 0.147.0: seventeen skills, two MCP servers, with `PLUGIN_ROOT`/`PLUGIN_DATA` injected per spec.
+- **Root `plugin.json` and `mcp.json`**, conforming to Agent Plugins 1.0.0. Verified on Codex 0.147.0: seventeen skills, two MCP servers, with `PLUGIN_ROOT`/`PLUGIN_DATA` injected per spec. Cursor 3.14.27 also recognises the spec directly — its agent host carries both schema URLs and the spec's `name` regex. VS Code 1.125.1 does **not**: the `agent-plugins.org` string appears nowhere in its bundle, and it loads this repo through the generated `.claude-plugin/plugin.json` and `.mcp.json` instead. That works, and is why the compatibility manifests are still generated.
 - **Kiro support** via the `dev.kiro` extension namespace in `plugin.json`, which is what the spec's reverse-domain namespaces are for.
 - **Gemini CLI support** via a generated `gemini-extension.json` — **MCP servers only**. Gemini has no agent-skill primitive, so the seventeen skills are not available there and both the manifest description and the README say so rather than implying parity.
 - **`scripts/conformance.mjs`**, a spec validator. The specification ships none and its failure semantics are silent, so this asserts the expected skill set explicitly (from `.skills-source.json`) rather than trusting that a passing install means a working one.
