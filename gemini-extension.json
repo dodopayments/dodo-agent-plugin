@@ -1,6 +1,6 @@
 {
     "name": "dodopayments",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "Dodo Payments MCP servers: live API access and documentation search. Gemini CLI has no agent-skill primitive, so the seventeen skills in this plugin are not available here.",
     "mcpServers": {
         "dodopayments-api": {

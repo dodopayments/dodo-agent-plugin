@@ -1,7 +1,7 @@
 {
     "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
     "name": "dodopayments",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "Dodo Payments tools for AI coding agents, including integration agent skills and the Dodo Payments API and docs MCP servers.",
     "author": {
         "name": "Dodo Payments",
