@@ -26,6 +26,13 @@ jobs:
                   node-version: "20"
                   registry-url: "https://registry.npmjs.org"
 
+
+            # npm Trusted Publishing (OIDC) needs npm >= 11.5.1; the Node
+            # version above ships an older npm. Pin 11.6.2 for reproducible runs
+            # (11.5.2 fixed an OIDC/provenance ordering bug, 11.6.2 resolves
+            # trusted-publishing failures seen in the wild).
+            - name: Upgrade npm for trusted publishing
+              run: npm install -g npm@11.6.2
             - name: Verify generated artifacts are in sync
               run: node scripts/build.mjs --check
 
@@ -42,5 +49,3 @@ jobs:
             - name: Publish
               if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.dry_run == false)
               run: npm publish --provenance --access public
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
