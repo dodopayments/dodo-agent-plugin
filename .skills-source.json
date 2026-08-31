@@ -3,8 +3,8 @@
     "repository": "https://github.com/dodopayments/skills",
     "branch": "main",
     "path": "dodo-payments",
-    "commit": "8d6ccd90faad91dcb9654197c3da1fc3ce011efc",
-    "syncedAt": "2026-08-07",
+    "commit": "d582cfb3d3475e6f1c8be219c75a3129c4def518",
+    "syncedAt": "2026-08-31",
     "transforms": [
         {
             "type": "rename",
