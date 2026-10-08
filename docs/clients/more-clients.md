@@ -6,7 +6,7 @@ Every client below loads this repository without a client-specific manifest. Whe
 
 | Client | Install | Notes |
 |---|---|---|
-| GitHub Copilot CLI / app | `copilot plugin install dodopayments/dodo-agent-plugin` | Reads the root Agent Plugins manifest |
+| GitHub Copilot CLI / app | `copilot plugin marketplace add dodopayments/dodo-agent-plugin` then `copilot plugin install dodopayments@dodopayments` | Uses `.claude-plugin/marketplace.json`; direct repo installs are deprecated. Verified on Copilot CLI 1.0.93 |
 | Qwen Code | `qwen extensions install dodopayments/dodo-agent-plugin` | Agent Plugins, Claude marketplaces and Gemini extensions are all accepted |
 | Devin CLI / Desktop | `devin plugins install dodopayments/dodo-agent-plugin` | Loads via `.claude-plugin/`; `devin mcp login dodopayments-api` |
 | Goose | `goose plugin install https://github.com/dodopayments/dodo-agent-plugin` | Plugin MCP servers come from `.mcp.json` |
