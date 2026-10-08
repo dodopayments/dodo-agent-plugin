@@ -195,6 +195,88 @@ check(
         JSON.stringify(Object.keys(mcp.mcpServers).sort()),
 );
 
+// Every remote server in the legacy .mcp.json must be dialled natively. The
+// mcp-remote bridge needs Node and hides OAuth from the client; it was removed
+// in 0.6.0 and must not creep back in through a hand edit or a generator bug.
+for (const [serverName, server] of Object.entries(legacyMcp.mcpServers)) {
+    const canonical = mcp.mcpServers[serverName];
+    if (!canonical || canonical.type === "stdio") continue;
+    check(
+        `legacy .mcp.json "${serverName}" is native http at the canonical URL`,
+        server.type === "http" && server.url === canonical.url && !JSON.stringify(server).includes("mcp-remote"),
+        JSON.stringify(server),
+    );
+}
+
+/**
+ * Per-client manifests. Each must report the canonical version, list exactly
+ * the declared skills, and point at exactly the canonical endpoints - the same
+ * silent-loss failure mode as skills/, one level up.
+ */
+const canonicalRemote = Object.fromEntries(
+    Object.entries(mcp.mcpServers).filter(([, s]) => s.type !== "stdio").map(([k, s]) => [k, s.url]),
+);
+const sameEndpoints = (entries) => JSON.stringify(Object.fromEntries(Object.entries(entries).sort())) ===
+    JSON.stringify(Object.fromEntries(Object.entries(canonicalRemote).sort()));
+
+for (const rel of [".muse-plugin/plugin.json", "plugins/dodopayments/.muse-plugin/plugin.json"]) {
+    const muse = read(rel);
+    check(`${rel} version matches plugin.json`, muse.version === plugin.version, muse.version);
+    check(`${rel} declares schemaVersion 1`, muse.schemaVersion === 1);
+    const ids = (muse.capabilities?.skills ?? []).map((s) => s.id);
+    check(
+        `${rel} lists exactly the declared skills`,
+        JSON.stringify([...ids].sort()) === JSON.stringify([...EXPECTED_SKILL_NAMES].sort()),
+        ids.join(", "),
+    );
+    for (const s of muse.capabilities?.skills ?? []) {
+        check(`${rel} skill "${s.id}" path resolves`, existsSync(join(ROOT, dirname(dirname(rel)), s.path)), s.path);
+    }
+    check(
+        `${rel} registers exactly the canonical MCP endpoints`,
+        sameEndpoints(Object.fromEntries((muse.capabilities?.mcpServers ?? []).map((s) => [s.id, s.url]))),
+    );
+}
+
+const antigravity = read("providers/antigravity/plugin.json");
+const strayAntigravity = Object.keys(antigravity).filter((k) => !["$schema", "name", "description"].includes(k));
+check("providers/antigravity/plugin.json uses only $schema/name/description", strayAntigravity.length === 0, strayAntigravity.join(", "));
+check("providers/antigravity/plugin.json name matches Antigravity pattern", /^[a-zA-Z0-9-_]+$/.test(antigravity.name ?? ""));
+check(
+    "providers/antigravity/mcp_config.json uses serverUrl for exactly the canonical endpoints",
+    sameEndpoints(Object.fromEntries(Object.entries(read("providers/antigravity/mcp_config.json").mcpServers).map(([k, s]) => [k, s.serverUrl]))),
+);
+
+const junie = read("providers/junie/extension.json");
+check("providers/junie/extension.json has only name/description", Object.keys(junie).every((k) => ["name", "description"].includes(k)));
+check(
+    "providers/junie/mcp/.mcp.json points at exactly the canonical endpoints",
+    sameEndpoints(Object.fromEntries(Object.entries(read("providers/junie/mcp/.mcp.json").mcpServers).map(([k, s]) => [k, s.url]))),
+);
+
+for (const bundle of ["providers/antigravity", "providers/junie"]) {
+    const found = readdirSync(join(ROOT, bundle, "skills")).filter((s) => existsSync(join(ROOT, bundle, "skills", s, "SKILL.md")));
+    check(
+        `${bundle}/skills ships exactly the declared skills`,
+        JSON.stringify(found.sort()) === JSON.stringify([...EXPECTED_SKILL_NAMES].sort()),
+        found.join(", "),
+    );
+}
+
+for (const rel of [".claude-plugin/marketplace.json", ".cursor-plugin/plugin.json", ".codex-plugin/plugin.json", "gemini-extension.json"]) {
+    const doc = read(rel);
+    const v = doc.version ?? doc.metadata?.version;
+    check(`${rel} version matches plugin.json`, v === plugin.version, v);
+}
+
+// Skill counts belong to .skills-source.json. A number word baked into a
+// manifest silently becomes false the day upstream adds or removes a skill.
+const NUMBER_WORDS = /\b(ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\b/i;
+for (const rel of ["plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json", "gemini-extension.json", ".muse-plugin/plugin.json"]) {
+    const hit = readFileSync(join(ROOT, rel), "utf8").match(NUMBER_WORDS);
+    check(`${rel} hard-codes no skill count as a word`, !hit, hit?.[0]);
+}
+
 /**
  * The OpenCode plugin registers MCP servers programmatically, in OpenCode's own
  * config shape (`type: "local"`, `command: [...]`), so it is hand-written rather

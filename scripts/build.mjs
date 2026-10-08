@@ -10,7 +10,11 @@
  * Generated (never hand-edit):
  *   .claude-plugin/plugin.json        .claude-plugin/marketplace.json
  *   .cursor-plugin/plugin.json        .agents/plugins/marketplace.json
- *   .mcp.json                         package.json (version field only)
+ *   .codex-plugin/plugin.json         .muse-plugin/plugin.json
+ *   gemini-extension.json             .mcp.json
+ *   plugins/dodopayments/**           (Codex + Muse bundle)
+ *   providers/antigravity/**          providers/junie/**
+ *   package.json (version field only)
  *
  * Usage:
  *   node scripts/build.mjs            write artifacts
@@ -50,6 +54,10 @@ const overlays = {
 
 const { version, name, author, homepage, repository, license } = plugin;
 
+/** Declared skill set; the single source for every count and skill list emitted below. */
+const skillNames = read(".skills-source.json").skills;
+const skillCount = skillNames.length;
+
 /**
  * Codex UI metadata lives in the spec's extension namespace. Fail loudly rather
  * than emitting manifests with `undefined` fields if it is ever removed.
@@ -76,32 +84,32 @@ const keywordsFor = (tag) => {
 };
 
 /**
- * `.mcp.json` for Claude Code and Cursor, projected from the canonical config.
+ * `.mcp.json`, projected from the canonical config. Read by every client that
+ * loads a Claude-style plugin or falls back to `.mcp.json` because the closed
+ * Agent Plugins manifest cannot carry `mcpServers`: Claude Code, Cursor's legacy
+ * path, VS Code, Grok Build, Devin, Goose, Factory Droid, Augment.
  *
  * Two deliberate differences from mcp.json:
  *
  * - `enabled` is NOT a member of the Agent Plugins closed server union
  *   (verified: `additionalProperties: false` on every transport variant), and a
  *   stray key silently skips the entire server entry, so it lives only here.
- * - Remote transports are wrapped in the `mcp-remote` stdio bridge. The URLs are
- *   derived from the canonical entries rather than duplicated, so the two files
- *   cannot drift apart.
+ * - Remote transports are spelled `"type": "http"`, the name the Claude-style
+ *   `.mcp.json` dialect uses for Streamable HTTP. The spec's `streamable-http`
+ *   is not understood there. Verified on Claude Code 2.1.282 and cursor-agent
+ *   2026.08.04: `dodo-knowledge` connects natively and `dodopayments-api`
+ *   reports "needs authentication" (OAuth discovery), so the `npx mcp-remote`
+ *   bridge - and its Node dependency - is no longer needed.
  */
-function legacyMcpConfig() {
-    const toStdio = (server) =>
-        server.type === "stdio"
-            ? server
-            : {
-                  type: "stdio",
-                  command: "npx",
-                  args: ["-y", "mcp-remote@latest", server.url],
-              };
+const legacyRemote = (server) =>
+    server.type === "stdio" ? server : { type: "http", url: server.url };
 
+function legacyMcpConfig() {
     return {
         mcpServers: Object.fromEntries(
             Object.entries(mcp.mcpServers).map(([serverName, server]) => [
                 serverName,
-                { ...toStdio(server), enabled: true },
+                { ...legacyRemote(server), enabled: true },
             ]),
         ),
     };
@@ -123,7 +131,80 @@ function codexManifest() {
     };
 }
 
+/**
+ * Meta Muse Code native manifest. Muse has no published schema; the shape is
+ * taken from first-party and partner manifests (facebookresearch/autoform-bot,
+ * muxinc/mux-agent-plugin). Every skill must be listed explicitly, so the list
+ * is generated from the declared skill set and asserted by conformance. Remote
+ * MCP inside a manifest uses `transport: "http"` (the settings file spells it
+ * `streamable_http`); OAuth runs via `muse mcp login <id>`.
+ */
+function museManifest() {
+    return {
+        schemaVersion: 1,
+        name,
+        displayName: codexInterface().displayName,
+        version,
+        description: `Dodo Payments for Muse Code: ${skillCount} integration agent skills plus the Dodo Payments API and documentation MCP servers.`,
+        author: { name: author.name, email: author.email },
+        compat: { source: "native", manifestDir: ".muse-plugin" },
+        capabilities: {
+            skills: skillNames.map((id) => ({ id, path: `skills/${id}/SKILL.md`, enabledDefault: true })),
+            commands: [],
+            hooks: [],
+            mcpServers: Object.entries(mcp.mcpServers)
+                .filter(([, server]) => server.type !== "stdio")
+                .map(([id, server]) => ({ id, transport: "http", url: server.url })),
+            reminders: [],
+        },
+    };
+}
+
+/**
+ * Self-contained bundles for clients whose manifest schema is closed and
+ * incompatible with the root Agent Plugins plugin.json. Each lives in its own
+ * directory so its manifest never collides with the canonical one.
+ */
+const ANTIGRAVITY = "providers/antigravity";
+const JUNIE = "providers/junie";
+
+const remoteServers = () => Object.entries(mcp.mcpServers).filter(([, server]) => server.type !== "stdio");
+
+const providerDescription = (client) =>
+    `Dodo Payments for ${client}: ${skillCount} integration agent skills plus the Dodo Payments API and documentation MCP servers.`;
+
 const artifacts = {
+    // ---- Meta Muse Code ----------------------------------------------------
+    // Emitted at the root (git-URL installs) and inside the Codex bundle,
+    // because Muse also reads .agents/plugins/marketplace.json, which points
+    // at that bundle.
+    ".muse-plugin/plugin.json": museManifest(),
+    [`${BUNDLE}/.muse-plugin/plugin.json`]: museManifest(),
+
+    // ---- Google Antigravity ------------------------------------------------
+    // Schema (antigravity.google/docs/plugins) allows only name + description
+    // with additionalProperties:false. Remote MCP must use `serverUrl`; `url`
+    // and `httpUrl` are rejected. OAuth is automatic for DCR-capable servers.
+    [`${ANTIGRAVITY}/plugin.json`]: {
+        $schema: "https://antigravity.google/schemas/v1/plugin.json",
+        name,
+        description: providerDescription("Antigravity"),
+    },
+    [`${ANTIGRAVITY}/mcp_config.json`]: {
+        mcpServers: Object.fromEntries(remoteServers().map(([id, server]) => [id, { serverUrl: server.url }])),
+    },
+
+    // ---- JetBrains Junie ---------------------------------------------------
+    // extension.json carries only name + description (every registry entry);
+    // MCP lives at mcp/.mcp.json with a bare `url` per remote server.
+    [`${JUNIE}/extension.json`]: {
+        name,
+        description: providerDescription("Junie"),
+    },
+    [`${JUNIE}/mcp/.mcp.json`]: {
+        mcpServers: Object.fromEntries(remoteServers().map(([id, server]) => [id, { url: server.url }])),
+    },
+
     // ---- Claude Code -------------------------------------------------------
     ".claude-plugin/plugin.json": {
         ...portableBase(),
@@ -186,14 +267,13 @@ const artifacts = {
     ".codex-plugin/plugin.json": codexManifest(),
 
     // ---- Gemini CLI --------------------------------------------------------
-    // MCP servers only. Gemini has no SKILL.md primitive, and flattening
-    // seventeen skills into GEMINI.md would cost tens of thousands of tokens of
-    // always-on context. The docs say so plainly rather than implying parity.
+    // Gemini CLI extensions auto-discover a `skills/` directory that sits next
+    // to gemini-extension.json (docs/extensions/reference.md), so the vendored
+    // skills load from the repo root with no extra manifest field.
     "gemini-extension.json": {
         name,
         version,
-        description:
-            "Dodo Payments MCP servers: live API access and documentation search. Gemini CLI has no agent-skill primitive, so the seventeen skills in this plugin are not available here.",
+        description: `Dodo Payments for Gemini CLI: ${skillCount} integration agent skills plus the Dodo Payments API and documentation MCP servers.`,
         mcpServers: Object.fromEntries(
             Object.entries(mcp.mcpServers).map(([serverName, server]) => [
                 serverName,
@@ -291,6 +371,8 @@ for (const [rel, contents] of targets) {
 
 syncTree("skills", `${BUNDLE}/skills`);
 syncTree("assets", `${BUNDLE}/assets`);
+syncTree("skills", `${ANTIGRAVITY}/skills`);
+syncTree("skills", `${JUNIE}/skills`);
 
 if (CHECK) {
     if (drift > 0) {
