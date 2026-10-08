@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.3 - 2026-10-08
+
+### Fixed
+
+- `refunds-and-disputes` no longer links `../webhook-integration/`, which breaks when the skill is installed on its own; it names the skill instead ([dodopayments/skills#31](https://github.com/dodopayments/skills/pull/31)). Clears the last github/awesome-copilot intake lint failure.
+
 ## 0.6.2 - 2026-10-08
 
 Skills resynced from [`dodopayments/skills`](https://github.com/dodopayments/skills) at `d243b0d`.
