@@ -1,5 +1,5 @@
 {
     "$schema": "https://antigravity.google/schemas/v1/plugin.json",
     "name": "dodopayments",
-    "description": "Dodo Payments for Antigravity: 17 integration agent skills plus the Dodo Payments API and documentation MCP servers."
+    "description": "Dodo Payments for Antigravity: 18 integration agent skills plus the Dodo Payments API and documentation MCP servers."
 }

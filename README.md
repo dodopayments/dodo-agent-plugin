@@ -175,6 +175,7 @@ If you prefer the local stdio API server with your own API key instead of the de
 | `dodo-best-practices` | SDK setup, environments, API keys, and the canonical checkout-to-webhook architecture |
 | `framework-adapters` | Official `@dodopayments/*` handlers for Next.js, Express, Hono, Astro, Remix, SvelteKit, Nuxt, Fastify, TanStack, Bun, Convex |
 | `testing-and-go-live` | Test mode, test payment methods, webhook testing, production launch checklist |
+| `dodo-mcp-usage` | When to use the documentation vs API MCP servers, test-mode safety rules, auth, troubleshooting |
 
 **Accepting payments**
 

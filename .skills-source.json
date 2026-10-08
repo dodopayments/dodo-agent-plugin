@@ -3,16 +3,9 @@
     "repository": "https://github.com/dodopayments/skills",
     "branch": "main",
     "path": "dodo-payments",
-    "commit": "8d6ccd90faad91dcb9654197c3da1fc3ce011efc",
-    "syncedAt": "2026-08-07",
-    "transforms": [
-        {
-            "type": "rename",
-            "from": "best-practices",
-            "to": "dodo-best-practices",
-            "reason": "Agent Plugins requires the skill directory name to match the SKILL.md frontmatter `name`. Upstream ships name: dodo-best-practices in a directory named best-practices. Renaming the directory (rather than the frontmatter) keeps the user-visible skill name unchanged. Track removal via an upstream rename in dodopayments/skills."
-        }
-    ],
+    "commit": "23b65d41d8b48b9f3ead2eb8e78111277ef32949",
+    "syncedAt": "2026-10-08",
+    "transforms": [],
     "//skills": "Explicit expected skill set. scripts/conformance.mjs asserts skills/ matches this exactly, so an upstream addition or removal surfaces as a reviewable diff here instead of a silently changed count.",
     "skills": [
         "better-auth-integration",
@@ -22,6 +15,7 @@
         "customer-management",
         "discounts-and-promotions",
         "dodo-best-practices",
+        "dodo-mcp-usage",
         "framework-adapters",
         "license-keys",
         "localized-pricing",

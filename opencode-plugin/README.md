@@ -37,7 +37,7 @@ opencode run "List every skill available to you by name."
 
 ## What you get
 
-Agent skills (auto-loaded when relevant): `dodo-best-practices`, `framework-adapters`, `testing-and-go-live`, `checkout-integration`, `subscription-integration`, `mobile-checkout`, `webhook-integration`, `credit-based-billing`, `usage-based-billing`, `license-keys`, `product-catalog-management`, `discounts-and-promotions`, `localized-pricing`, `customer-management`, `refunds-and-disputes`, `billing-sdk`, `better-auth-integration`.
+Agent skills (auto-loaded when relevant): `dodo-best-practices`, `dodo-mcp-usage`, `framework-adapters`, `testing-and-go-live`, `checkout-integration`, `subscription-integration`, `mobile-checkout`, `webhook-integration`, `credit-based-billing`, `usage-based-billing`, `license-keys`, `product-catalog-management`, `discounts-and-promotions`, `localized-pricing`, `customer-management`, `refunds-and-disputes`, `billing-sdk`, `better-auth-integration`.
 
 Two MCP servers (registered automatically):
 
