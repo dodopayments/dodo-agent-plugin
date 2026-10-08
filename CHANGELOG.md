@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.4 - 2026-10-08
+
+### Added
+
+- **ChatGPT and Codex plugin directory metadata** in `plugin.json` under `extensions["com.openai"]`, which the OpenAI submission portal imports from the uploaded ZIP: website, support, privacy policy and terms URLs, capabilities, brand color, the five positive and three negative review test cases, the reviewer demo recording, and release notes.
+- PNG icon (`assets/icon.png`, 512px) and logo (`assets/logo.png`, 1024px), rendered from `assets/icon.svg`. The OpenAI portal does not accept the SVG as an app icon.
+
+### Changed
+
+- OpenAI `shortDescription` shortened to "Payments and billing for apps"; the portal limits the subtitle to 30 characters.
+- OpenAI `longDescription` reworded to describe what the skills and the MCP server actually do. The portal flagged the old wording for promising more than the plugin supports.
+
 ## 0.6.3 - 2026-10-08
 
 ### Fixed
