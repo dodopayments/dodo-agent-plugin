@@ -3,7 +3,7 @@
     "name": "dodopayments",
     "displayName": "Dodo Payments",
     "version": "0.6.0",
-    "description": "Dodo Payments for Muse Code: 17 integration agent skills plus the Dodo Payments API and documentation MCP servers.",
+    "description": "Dodo Payments for Muse Code: 18 integration agent skills plus the Dodo Payments API and documentation MCP servers.",
     "author": {
         "name": "Dodo Payments",
         "email": "support@dodopayments.com"
@@ -47,6 +47,11 @@
             {
                 "id": "dodo-best-practices",
                 "path": "skills/dodo-best-practices/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "dodo-mcp-usage",
+                "path": "skills/dodo-mcp-usage/SKILL.md",
                 "enabledDefault": true
             },
             {

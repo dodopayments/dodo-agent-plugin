@@ -1,7 +1,7 @@
 {
     "name": "dodopayments",
     "version": "0.6.0",
-    "description": "Dodo Payments for Gemini CLI: 17 integration agent skills plus the Dodo Payments API and documentation MCP servers.",
+    "description": "Dodo Payments for Gemini CLI: 18 integration agent skills plus the Dodo Payments API and documentation MCP servers.",
     "mcpServers": {
         "dodopayments-api": {
             "httpUrl": "https://mcp.dodopayments.com/mcp"

@@ -1,6 +1,6 @@
 ---
 name: usage-based-billing
-description: Guide for charging directly per measured API call, token, storage unit, or other consumption using meters, stable usage events, aggregation, free thresholds, and metered subscriptions.
+description: Dodo Payments usage-based billing that charges per measured unit, covering meters, usage event ingestion by event_name, aggregation, free thresholds, price_per_unit, and metered subscriptions. Use when billing per API call, AI token, storage, or bandwidth, sending usage events, or adding metered pricing to a plan; use credit-based-billing for prepaid credit pools.
 ---
 
 # Dodo Payments Usage-Based Billing
@@ -181,7 +181,7 @@ async function trackBatchUsage(
     customerId: string;
     eventName: string;
     occurredAt: string;
-    metadata: Record<string, string>;
+    metadata: Record<string, string | number | boolean>;
   }>
 ) {
   const formattedEvents = events.map((event) => ({
@@ -301,10 +301,11 @@ async function callAI(
       customer_id: customerId,
       event_name: 'ai.tokens',
       timestamp: completedAt,
+      // Aggregated properties (Sum/Max/Last) must be numbers, not strings.
       metadata: {
-        tokens: response.usage.total_tokens.toString(),
-        prompt_tokens: response.usage.prompt_tokens.toString(),
-        completion_tokens: response.usage.completion_tokens.toString(),
+        tokens: response.usage.total_tokens,
+        prompt_tokens: response.usage.prompt_tokens,
+        completion_tokens: response.usage.completion_tokens,
         model: 'gpt-4',
       }
     }]
@@ -331,9 +332,10 @@ async function updateStorageUsage(
       customer_id: customerId,
       event_name: 'storage.snapshot',
       timestamp: capturedAt,
+      // Numeric values: a string property does not aggregate.
       metadata: {
-        bytes: bytesUsed.toString(),
-        gb: (bytesUsed / 1024 / 1024 / 1024).toFixed(2),
+        bytes: bytesUsed,
+        gb: Number((bytesUsed / 1024 / 1024 / 1024).toFixed(2)),
       }
     }]
   });
@@ -355,15 +357,16 @@ await updateStorageUsage(
 ### Retrieve Usage History
 
 ```typescript
-const usage = await client.subscriptions.retrieveUsageHistory(
-  'sub_abc123',
-  { page_size: 100 }
-);
-
-console.log(usage.items); // Array of billing-period usage records
+// Auto-paginates across ALL billing periods; narrow with start_date/end_date/meter_id.
+for await (const period of client.subscriptions.retrieveUsageHistory('sub_abc123', {
+  start_date: '2025-01-01T00:00:00Z',
+  page_size: 20,
+})) {
+  console.log(period); // one record per billing period, with per-meter usage
+}
 ```
 
-This returns aggregated usage per meter for the subscription's current billing period.
+This is paginated usage history organized by billing period, across the subscription's lifetime - not just the current period. Filter with `start_date`, `end_date`, and `meter_id`, and iterate pages (or `for await`) rather than reading only the first page.
 
 ---
 
@@ -378,7 +381,7 @@ To link a meter to credits:
 3. On the meter, enable **Bill usage in Credits**.
 4. Set `credit_entitlement_id` and `meter_units_per_credit` (e.g., 1,000 tokens = 1 credit).
 
-Usage under the free threshold is excluded. Approximately every minute, a background worker aggregates new usage, converts it using the meter-to-credit ratio, and consumes the oldest non-expired credit grants (FIFO). When credits run out, configured overage behavior applies.
+The free threshold does **not** apply to credit-billed meters: every unit counts toward credit deduction (it only applies when the meter bills in money). Approximately every minute, a background worker aggregates new usage, converts it using the meter-to-credit ratio, and deducts from non-expired grants, earliest-expiring grants consumed first. When credits run out, configured overage behavior applies.
 
 ---
 
