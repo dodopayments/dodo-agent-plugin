@@ -195,17 +195,112 @@ check(
         JSON.stringify(Object.keys(mcp.mcpServers).sort()),
 );
 
+// Every remote server in the legacy .mcp.json must be dialled natively. The
+// mcp-remote bridge needs Node and hides OAuth from the client; it was removed
+// in 0.6.0 and must not creep back in through a hand edit or a generator bug.
+for (const [serverName, server] of Object.entries(legacyMcp.mcpServers)) {
+    const canonical = mcp.mcpServers[serverName];
+    if (!canonical || canonical.type === "stdio") continue;
+    check(
+        `legacy .mcp.json "${serverName}" is native http at the canonical URL`,
+        server.type === "http" && server.url === canonical.url && !JSON.stringify(server).includes("mcp-remote"),
+        JSON.stringify(server),
+    );
+}
+
+/**
+ * Per-client manifests. Each must report the canonical version, list exactly
+ * the declared skills, and point at exactly the canonical endpoints - the same
+ * silent-loss failure mode as skills/, one level up.
+ */
+const canonicalRemote = Object.fromEntries(
+    Object.entries(mcp.mcpServers).filter(([, s]) => s.type !== "stdio").map(([k, s]) => [k, s.url]),
+);
+const sameEndpoints = (entries) => JSON.stringify(Object.fromEntries(Object.entries(entries).sort())) ===
+    JSON.stringify(Object.fromEntries(Object.entries(canonicalRemote).sort()));
+
+for (const rel of [".muse-plugin/plugin.json", "plugins/dodopayments/.muse-plugin/plugin.json"]) {
+    const muse = read(rel);
+    check(`${rel} version matches plugin.json`, muse.version === plugin.version, muse.version);
+    check(`${rel} declares schemaVersion 1`, muse.schemaVersion === 1);
+    const ids = (muse.capabilities?.skills ?? []).map((s) => s.id);
+    check(
+        `${rel} lists exactly the declared skills`,
+        JSON.stringify([...ids].sort()) === JSON.stringify([...EXPECTED_SKILL_NAMES].sort()),
+        ids.join(", "),
+    );
+    for (const s of muse.capabilities?.skills ?? []) {
+        check(`${rel} skill "${s.id}" path resolves`, existsSync(join(ROOT, dirname(dirname(rel)), s.path)), s.path);
+    }
+    for (const server of muse.capabilities?.mcpServers ?? []) {
+        check(
+            `${rel} MCP "${server.id}" uses transport "http" with a url and no command`,
+            server.transport === "http" && typeof server.url === "string" && server.command === undefined,
+            JSON.stringify(server),
+        );
+    }
+    check(
+        `${rel} registers exactly the canonical MCP endpoints`,
+        sameEndpoints(Object.fromEntries((muse.capabilities?.mcpServers ?? []).map((s) => [s.id, s.url]))),
+    );
+}
+
+const antigravity = read("providers/antigravity/plugin.json");
+const strayAntigravity = Object.keys(antigravity).filter((k) => !["$schema", "name", "description"].includes(k));
+check("providers/antigravity/plugin.json uses only $schema/name/description", strayAntigravity.length === 0, strayAntigravity.join(", "));
+check("providers/antigravity/plugin.json name matches Antigravity pattern", /^[a-zA-Z0-9-_]+$/.test(antigravity.name ?? ""));
+check(
+    "providers/antigravity/mcp_config.json uses serverUrl for exactly the canonical endpoints",
+    sameEndpoints(Object.fromEntries(Object.entries(read("providers/antigravity/mcp_config.json").mcpServers).map(([k, s]) => [k, s.serverUrl]))),
+);
+
+const junie = read("providers/junie/extension.json");
+check("providers/junie/extension.json has only name/description", Object.keys(junie).every((k) => ["name", "description"].includes(k)));
+check(
+    "providers/junie/mcp/.mcp.json points at exactly the canonical endpoints",
+    sameEndpoints(Object.fromEntries(Object.entries(read("providers/junie/mcp/.mcp.json").mcpServers).map(([k, s]) => [k, s.url]))),
+);
+
+for (const bundle of ["providers/antigravity", "providers/junie"]) {
+    const found = readdirSync(join(ROOT, bundle, "skills")).filter((s) => existsSync(join(ROOT, bundle, "skills", s, "SKILL.md")));
+    check(
+        `${bundle}/skills ships exactly the declared skills`,
+        JSON.stringify(found.sort()) === JSON.stringify([...EXPECTED_SKILL_NAMES].sort()),
+        found.join(", "),
+    );
+}
+
+for (const rel of [".claude-plugin/marketplace.json", ".cursor-plugin/plugin.json", ".codex-plugin/plugin.json", "gemini-extension.json"]) {
+    const doc = read(rel);
+    const v = doc.version ?? doc.metadata?.version;
+    check(`${rel} version matches plugin.json`, v === plugin.version, v);
+}
+
+// Skill counts belong to .skills-source.json. A number word baked into a
+// manifest silently becomes false the day upstream adds or removes a skill.
+const NUMBER_WORDS = /\b(ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\b/i;
+const COUNT_FREE = [
+    "plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json",
+    "gemini-extension.json", ".muse-plugin/plugin.json",
+    "README.md", "opencode-plugin/README.md",
+    ...readdirSync(join(ROOT, "docs/clients")).map((f) => `docs/clients/${f}`),
+];
+for (const rel of COUNT_FREE) {
+    const hit = readFileSync(join(ROOT, rel), "utf8").match(NUMBER_WORDS);
+    check(`${rel} hard-codes no count as a word`, !hit, hit?.[0]);
+}
+
 /**
  * The OpenCode plugin registers MCP servers programmatically, in OpenCode's own
- * config shape (`type: "local"`, `command: [...]`), so it is hand-written rather
+ * config shape (`type: "remote"`, `url`), so it is hand-written rather
  * than emitted by build.mjs -- which means `--check` cannot see it drift. It is
  * also the only MCP registration path OpenCode users get: they never read
  * .mcp.json. A transport or hostname change applied to the generated artifacts
  * but not here leaves that one client pointed at a stale endpoint, silently.
  *
  * Bind the two together: the set of Dodo endpoint URLs referenced by the plugin
- * must equal the canonical set. Transport-agnostic on purpose -- the bridge is
- * an OpenCode-side detail, the endpoint is not.
+ * must equal the canonical set, and every entry must be OpenCode's native
+ * remote transport -- a local command (the old mcp-remote bridge) is rejected.
  */
 // Match the apex domain or a true subdomain. A bare endsWith would also accept
 // `notdodopayments.com`, which would let a typo'd host register as canonical.
@@ -255,6 +350,14 @@ check(
     Object.keys(registered.mcp ?? {}).join(", "),
 );
 
+for (const [serverName, entry] of Object.entries(registered.mcp ?? {})) {
+    check(
+        `opencode-plugin "${serverName}" uses native type "remote" with a url and no command`,
+        entry.type === "remote" && typeof entry.url === "string" && entry.command === undefined,
+        JSON.stringify(entry),
+    );
+}
+
 const opencodeUrls = dodoUrlsIn(JSON.stringify(registered.mcp ?? {}));
 const missingInOpencode = [...canonicalUrls].filter((u) => !opencodeUrls.has(u));
 const staleInOpencode = [...opencodeUrls].filter((u) => !canonicalUrls.has(u));
@@ -273,8 +376,7 @@ check(
  * The endpoint gate above compares URLs, so it cannot see prose. Migrating the
  * transports left user-visible text behind twice -- the Claude Code config UI
  * still called the default a "remote SSE server", and the README said both
- * servers were wired through mcp-remote, which is now true only of the
- * generated compatibility manifests.
+ * servers were wired through mcp-remote after that stopped being true.
  *
  * Assert the narrow, self-adjusting form: if no canonical server actually uses
  * the `sse` transport, no user-facing text may describe one. Scoped to the

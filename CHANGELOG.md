@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.6.0 - 2026-10-08
+
+Extends the plugin to Grok, Meta Muse Code, Antigravity, Junie and a long tail of other assistants, and removes the `mcp-remote` bridge everywhere.
+
+### Added
+
+- **Meta Muse Code** via a generated `.muse-plugin/plugin.json` (root and Codex/Muse bundle) listing every declared skill and both MCP servers. Install with `muse plugins marketplace add` — see [docs/clients/muse.md](./docs/clients/muse.md).
+- **Google Antigravity** via a generated, self-contained `providers/antigravity/` bundle. Its manifest schema is closed (`name`/`description` only) and its MCP config requires `serverUrl`, so it cannot share the root manifest.
+- **JetBrains Junie** via a generated `providers/junie/` bundle (`extension.json`, `skills/`, `mcp/.mcp.json`).
+- **Grok** documentation: Grok Build loads this repo unchanged (root `plugin.json`, `skills/`, `.mcp.json`, `.claude-plugin/marketplace.json`); grok.com custom connector and the xAI API `mcp` tool are documented in [docs/clients/grok.md](./docs/clients/grok.md).
+- **More clients**: install instructions for Copilot CLI, Qwen Code, Devin, Goose, Factory Droid, Augment, OpenHands/OpenClaw/Hermes, Cline, Kilo, Amp, Kimi, Zed, and MCP-only assistants in [docs/clients/more-clients.md](./docs/clients/more-clients.md). The README now opens with a support matrix.
+- **Conformance gates** for every new artifact: Muse skill list equals the declared set and every path resolves; Antigravity/Junie manifests use only their allowed keys; every per-client MCP config points at exactly the canonical endpoints; every generated manifest reports the canonical version; no manifest hard-codes a skill count as a word.
+
+### Changed
+
+- **`.mcp.json` dials both servers natively** (`"type": "http"`) instead of through `npx -y mcp-remote`. This removes the Node dependency and lets each client run OAuth itself. Verified: Claude Code 2.1.282 (plugin dir) and cursor-agent 2026.08.04 connect `dodo-knowledge` and report `dodopayments-api` as needing authentication; Codex 0.159.3 installs v0.6.0 with 17 skills and both servers native. `conformance.mjs` fails if `mcp-remote` returns.
+- **OpenCode plugin uses `type: "remote"`** for both servers. Verified on OpenCode 1.18.34; sign in with `opencode mcp auth dodopayments-api`.
+- **Gemini CLI loads the skills.** Gemini auto-discovers `skills/` next to `gemini-extension.json`; the manifest no longer claims otherwise. Verified on Gemini CLI 0.63.0: 17 skills, 2 MCP servers.
+- Skill counts are interpolated from `.skills-source.json` instead of hard-coded.
+- `package.json` description updated; the npm package now also ships the canonical `mcp.json`.
+- Maintainer docs describe npm Trusted Publishing instead of the removed `NPM_TOKEN`.
+
+## 0.5.1 - 2026-08-24
+
+### Changed
+
+- npm publishing moved to Trusted Publishing (OIDC); the `NPM_TOKEN` secret is gone and releases carry provenance (#15, #16).
+- Generated artifacts resynced to 0.5.1 (#17).
+- Dependabot keeps pinned GitHub Actions current (#18).
+
 ## 0.5.0 - 2026-08-07
 
 Adopts the [Agent Plugins 1.0.0](https://agent-plugins.org/specification) specification and makes every provider-specific manifest a generated artifact of one canonical source. Two defects found during the migration were already shipping.

@@ -1,0 +1,119 @@
+{
+    "schemaVersion": 1,
+    "name": "dodopayments",
+    "displayName": "Dodo Payments",
+    "version": "0.6.0",
+    "description": "Dodo Payments for Muse Code: 17 integration agent skills plus the Dodo Payments API and documentation MCP servers.",
+    "author": {
+        "name": "Dodo Payments",
+        "email": "support@dodopayments.com"
+    },
+    "compat": {
+        "source": "native",
+        "manifestDir": ".muse-plugin"
+    },
+    "capabilities": {
+        "skills": [
+            {
+                "id": "better-auth-integration",
+                "path": "skills/better-auth-integration/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "billing-sdk",
+                "path": "skills/billing-sdk/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "checkout-integration",
+                "path": "skills/checkout-integration/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "credit-based-billing",
+                "path": "skills/credit-based-billing/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "customer-management",
+                "path": "skills/customer-management/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "discounts-and-promotions",
+                "path": "skills/discounts-and-promotions/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "dodo-best-practices",
+                "path": "skills/dodo-best-practices/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "framework-adapters",
+                "path": "skills/framework-adapters/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "license-keys",
+                "path": "skills/license-keys/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "localized-pricing",
+                "path": "skills/localized-pricing/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "mobile-checkout",
+                "path": "skills/mobile-checkout/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "product-catalog-management",
+                "path": "skills/product-catalog-management/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "refunds-and-disputes",
+                "path": "skills/refunds-and-disputes/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "subscription-integration",
+                "path": "skills/subscription-integration/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "testing-and-go-live",
+                "path": "skills/testing-and-go-live/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "usage-based-billing",
+                "path": "skills/usage-based-billing/SKILL.md",
+                "enabledDefault": true
+            },
+            {
+                "id": "webhook-integration",
+                "path": "skills/webhook-integration/SKILL.md",
+                "enabledDefault": true
+            }
+        ],
+        "commands": [],
+        "hooks": [],
+        "mcpServers": [
+            {
+                "id": "dodopayments-api",
+                "transport": "http",
+                "url": "https://mcp.dodopayments.com/mcp"
+            },
+            {
+                "id": "dodo-knowledge",
+                "transport": "http",
+                "url": "https://knowledge.dodopayments.com/mcp"
+            }
+        ],
+        "reminders": []
+    }
+}

@@ -30,19 +30,21 @@
 //
 // The endpoint URLs below MUST match the canonical mcp.json. This file is
 // hand-written rather than generated - OpenCode's config shape is its own
-// (`type: "local"`, `command: [...]`) - so `build.mjs --check` cannot cover
+// (`type: "remote"`, `url`) - so `build.mjs --check` cannot cover
 // it. `scripts/conformance.mjs` asserts the URL sets are identical instead.
-// The `mcp-remote` bridge is deliberate here, matching the generated
-// `.mcp.json`: only the canonical mcp.json uses native streamable-http.
+// `type: "remote"` is OpenCode's native Streamable HTTP transport; OpenCode
+// runs OAuth discovery itself. Verified on 1.18.34 from a project-level
+// opencode.json with these exact entries: dodo-knowledge connects, and
+// dodopayments-api reports "needs authentication" (`opencode mcp auth`).
 const DODO_MCP_SERVERS = {
     "dodopayments-api": {
-        type: "local",
-        command: ["npx", "-y", "mcp-remote@latest", "https://mcp.dodopayments.com/mcp"],
+        type: "remote",
+        url: "https://mcp.dodopayments.com/mcp",
         enabled: true,
     },
     "dodo-knowledge": {
-        type: "local",
-        command: ["npx", "-y", "mcp-remote@latest", "https://knowledge.dodopayments.com/mcp"],
+        type: "remote",
+        url: "https://knowledge.dodopayments.com/mcp",
         enabled: true,
     },
 };

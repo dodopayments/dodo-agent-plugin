@@ -1,5 +1,7 @@
 # Plan: Adopt Agent Plugins v1.0.0 + Expand Provider Support
 
+> **Historical record.** Written for v0.5.0. As of 0.6.0 every manifest dials both MCP servers natively; the `mcp-remote` bridge described below is gone. See CHANGELOG 0.6.0.
+
 **Repo:** `dodopayments/dodo-agent-plugin` (currently v0.4.0)
 **Target spec:** [Agent Plugins 1.0.0](https://agent-plugins.org/specification) (`agentplugins/agent-plugins-spec`)
 **Effort:** Large (3d+), decomposed into 5 independently shippable releases
@@ -35,7 +37,7 @@ The migration is **mostly additive**. The hard parts are not the spec — they a
 | Codex bundle | `plugins/dodopayments/**` | **Generated + git-committed.** Real copies of 17 skills + `.mcp.json` + manifest |
 | Skills | `skills/*` | **17 symlinks** → `../skills-src/dodo-payments/<name>` |
 | Skills source | `skills-src/` | **Git submodule** → `dodopayments/skills` @ `8d6ccd9` |
-| MCP config | `.mcp.json` | 2 servers, `type:"stdio"` + `npx mcp-remote`, `enabled:true` |
+| MCP config | `.mcp.json` | 2 servers, `type:"stdio"` + `npx mcp-remote`, `enabled:true` (superseded in 0.6.0: native `type:"http"`, no bridge) |
 | OpenCode plugin | `opencode-plugin/index.js` | **Programmatic** MCP registration, different shape (`type:"local"`, `command:[...]`) |
 | npm | `package.json` | `prepack` materializes symlinks, `postpack` deletes + `git checkout skills/` |
 | Scripts | `scripts/{sync-manifests,bundle-codex-plugin,build-skills-for-npm}.mjs` | 3 scripts |
