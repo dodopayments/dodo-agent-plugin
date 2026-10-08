@@ -7,12 +7,7 @@ Skills resynced from [`dodopayments/skills`](https://github.com/dodopayments/ski
 ### Changed
 
 - **Every `SKILL.md` is now within the Agent Skills 500-line limit** ([dodopayments/skills#28](https://github.com/dodopayments/skills/pull/28)). Long sections of nine skills (per-framework adapters, mobile platforms, server examples, the webhook event catalog and others) moved verbatim into each skill's `references/` folder, linked from the skill, so agents load the detail only when a task needs it. Pointers that said "above"/"below" now link the reference file instead ([dodopayments/skills#30](https://github.com/dodopayments/skills/pull/30)). This also unblocks the github/awesome-copilot intake lint.
-
 - Copilot CLI install docs use the marketplace flow (`copilot plugin marketplace add` then `install dodopayments@dodopayments`); direct repo installs are deprecated.
-
-### Fixed
-
-- **Pause/resume webhooks** ([dodopayments/skills#18](https://github.com/dodopayments/skills/pull/18)): `subscription.paused` and `subscription.unpaused` now re-read the subscription and apply its current status, so a late event cannot restore access to a re-paused subscription, and `past_due` keeps access during the grace period.
 
 ## 0.6.1 - 2026-10-08
 
