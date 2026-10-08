@@ -2,11 +2,11 @@
 
 ## 0.6.2 - 2026-10-08
 
-Skills resynced from [`dodopayments/skills`](https://github.com/dodopayments/skills) at `ab40479`.
+Skills resynced from [`dodopayments/skills`](https://github.com/dodopayments/skills) at `d243b0d`.
 
 ### Changed
 
-- **Every `SKILL.md` is now within the Agent Skills 500-line limit** ([dodopayments/skills#28](https://github.com/dodopayments/skills/pull/28)). Long sections of nine skills (per-framework adapters, mobile platforms, server examples, the webhook event catalog and others) moved verbatim into each skill's `references/` folder, linked from the skill, so agents load the detail only when a task needs it. This also unblocks the github/awesome-copilot intake lint.
+- **Every `SKILL.md` is now within the Agent Skills 500-line limit** ([dodopayments/skills#28](https://github.com/dodopayments/skills/pull/28)). Long sections of nine skills (per-framework adapters, mobile platforms, server examples, the webhook event catalog and others) moved verbatim into each skill's `references/` folder, linked from the skill, so agents load the detail only when a task needs it. Pointers that said "above"/"below" now link the reference file instead ([dodopayments/skills#30](https://github.com/dodopayments/skills/pull/30)). This also unblocks the github/awesome-copilot intake lint.
 
 - Copilot CLI install docs use the marketplace flow (`copilot plugin marketplace add` then `install dodopayments@dodopayments`); direct repo installs are deprecated.
 
