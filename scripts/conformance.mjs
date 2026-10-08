@@ -232,6 +232,13 @@ for (const rel of [".muse-plugin/plugin.json", "plugins/dodopayments/.muse-plugi
     for (const s of muse.capabilities?.skills ?? []) {
         check(`${rel} skill "${s.id}" path resolves`, existsSync(join(ROOT, dirname(dirname(rel)), s.path)), s.path);
     }
+    for (const server of muse.capabilities?.mcpServers ?? []) {
+        check(
+            `${rel} MCP "${server.id}" uses transport "http" with a url and no command`,
+            server.transport === "http" && typeof server.url === "string" && server.command === undefined,
+            JSON.stringify(server),
+        );
+    }
     check(
         `${rel} registers exactly the canonical MCP endpoints`,
         sameEndpoints(Object.fromEntries((muse.capabilities?.mcpServers ?? []).map((s) => [s.id, s.url]))),
@@ -272,22 +279,28 @@ for (const rel of [".claude-plugin/marketplace.json", ".cursor-plugin/plugin.jso
 // Skill counts belong to .skills-source.json. A number word baked into a
 // manifest silently becomes false the day upstream adds or removes a skill.
 const NUMBER_WORDS = /\b(ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\b/i;
-for (const rel of ["plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json", "gemini-extension.json", ".muse-plugin/plugin.json"]) {
+const COUNT_FREE = [
+    "plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json",
+    "gemini-extension.json", ".muse-plugin/plugin.json",
+    "README.md", "opencode-plugin/README.md",
+    ...readdirSync(join(ROOT, "docs/clients")).map((f) => `docs/clients/${f}`),
+];
+for (const rel of COUNT_FREE) {
     const hit = readFileSync(join(ROOT, rel), "utf8").match(NUMBER_WORDS);
-    check(`${rel} hard-codes no skill count as a word`, !hit, hit?.[0]);
+    check(`${rel} hard-codes no count as a word`, !hit, hit?.[0]);
 }
 
 /**
  * The OpenCode plugin registers MCP servers programmatically, in OpenCode's own
- * config shape (`type: "local"`, `command: [...]`), so it is hand-written rather
+ * config shape (`type: "remote"`, `url`), so it is hand-written rather
  * than emitted by build.mjs -- which means `--check` cannot see it drift. It is
  * also the only MCP registration path OpenCode users get: they never read
  * .mcp.json. A transport or hostname change applied to the generated artifacts
  * but not here leaves that one client pointed at a stale endpoint, silently.
  *
  * Bind the two together: the set of Dodo endpoint URLs referenced by the plugin
- * must equal the canonical set. Transport-agnostic on purpose -- the bridge is
- * an OpenCode-side detail, the endpoint is not.
+ * must equal the canonical set, and every entry must be OpenCode's native
+ * remote transport -- a local command (the old mcp-remote bridge) is rejected.
  */
 // Match the apex domain or a true subdomain. A bare endsWith would also accept
 // `notdodopayments.com`, which would let a typo'd host register as canonical.
@@ -337,6 +350,14 @@ check(
     Object.keys(registered.mcp ?? {}).join(", "),
 );
 
+for (const [serverName, entry] of Object.entries(registered.mcp ?? {})) {
+    check(
+        `opencode-plugin "${serverName}" uses native type "remote" with a url and no command`,
+        entry.type === "remote" && typeof entry.url === "string" && entry.command === undefined,
+        JSON.stringify(entry),
+    );
+}
+
 const opencodeUrls = dodoUrlsIn(JSON.stringify(registered.mcp ?? {}));
 const missingInOpencode = [...canonicalUrls].filter((u) => !opencodeUrls.has(u));
 const staleInOpencode = [...opencodeUrls].filter((u) => !canonicalUrls.has(u));
@@ -355,8 +376,7 @@ check(
  * The endpoint gate above compares URLs, so it cannot see prose. Migrating the
  * transports left user-visible text behind twice -- the Claude Code config UI
  * still called the default a "remote SSE server", and the README said both
- * servers were wired through mcp-remote, which is now true only of the
- * generated compatibility manifests.
+ * servers were wired through mcp-remote after that stopped being true.
  *
  * Assert the narrow, self-adjusting form: if no canonical server actually uses
  * the `sse` transport, no user-facing text may describe one. Scoped to the

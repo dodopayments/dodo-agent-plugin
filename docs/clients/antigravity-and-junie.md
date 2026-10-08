@@ -6,9 +6,14 @@ Both clients use a closed manifest format that conflicts with the root Agent Plu
 
 Bundle: [`providers/antigravity/`](../../providers/antigravity) — `plugin.json`, `mcp_config.json` (remote servers use `serverUrl`), `skills/`.
 
+Clone the repository, then install the bundle from its local path. Antigravity documents installing from a repository root, a marketplace, or a local directory; the repository root here is an Agent Plugins manifest that Antigravity's closed schema does not accept, so install the subdirectory:
+
 ```bash
-agy plugin install https://github.com/dodopayments/dodo-agent-plugin/providers/antigravity
+git clone https://github.com/dodopayments/dodo-agent-plugin.git
+agy plugin install ./dodo-agent-plugin/providers/antigravity
 ```
+
+To update, `git pull` and run the install command again.
 
 Antigravity handles OAuth automatically for the API server the first time a tool is called.
 

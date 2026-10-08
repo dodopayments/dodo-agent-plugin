@@ -30,7 +30,7 @@
 //
 // The endpoint URLs below MUST match the canonical mcp.json. This file is
 // hand-written rather than generated - OpenCode's config shape is its own
-// (`type: "local"`, `command: [...]`) - so `build.mjs --check` cannot cover
+// (`type: "remote"`, `url`) - so `build.mjs --check` cannot cover
 // it. `scripts/conformance.mjs` asserts the URL sets are identical instead.
 // `type: "remote"` is OpenCode's native Streamable HTTP transport; OpenCode
 // runs OAuth discovery itself. Verified on 1.18.34 from a project-level

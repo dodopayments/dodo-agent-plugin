@@ -1,6 +1,6 @@
 # @dodopayments/opencode-plugin
 
-Official OpenCode plugin for Dodo Payments. Ships seventeen integration skills and auto-registers two MCP servers.
+Official OpenCode plugin for Dodo Payments. Ships the Dodo Payments integration skills and auto-registers two MCP servers.
 
 This package is part of [`dodopayments/dodo-agent-plugin`](https://github.com/dodopayments/dodo-agent-plugin) - the universal Dodo Payments plugin that also installs into Claude Code, Codex, and Cursor.
 
@@ -25,7 +25,7 @@ npm install --save-dev @dodopayments/opencode-plugin
 Restart OpenCode.
 
 - Both MCP servers are registered automatically via the plugin's `config` hook.
-- The `skills.paths` entry is what makes the seventeen skills visible - OpenCode does not scan installed packages for skills. The path resolves against the **project** directory, not OpenCode's plugin cache, which is why the local install above is required. An absolute path works too and avoids that requirement.
+- The `skills.paths` entry is what makes the skills visible - OpenCode does not scan installed packages for skills. The path resolves against the **project** directory, not OpenCode's plugin cache, which is why the local install above is required. An absolute path works too and avoids that requirement.
 - The plugin module exports only its default function. OpenCode's loader throws `Plugin export is not a function` on any non-function named export, skips the plugin, and swallows the error - leaving you with no MCP servers. Verified on OpenCode 1.18.15.
 - The first call to `dodopayments-api` opens a browser for OAuth. `dodo-knowledge` needs no auth.
 
@@ -37,7 +37,7 @@ opencode run "List every skill available to you by name."
 
 ## What you get
 
-Seventeen agent skills (auto-loaded when relevant): `dodo-best-practices`, `framework-adapters`, `testing-and-go-live`, `checkout-integration`, `subscription-integration`, `mobile-checkout`, `webhook-integration`, `credit-based-billing`, `usage-based-billing`, `license-keys`, `product-catalog-management`, `discounts-and-promotions`, `localized-pricing`, `customer-management`, `refunds-and-disputes`, `billing-sdk`, `better-auth-integration`.
+Agent skills (auto-loaded when relevant): `dodo-best-practices`, `framework-adapters`, `testing-and-go-live`, `checkout-integration`, `subscription-integration`, `mobile-checkout`, `webhook-integration`, `credit-based-billing`, `usage-based-billing`, `license-keys`, `product-catalog-management`, `discounts-and-promotions`, `localized-pricing`, `customer-management`, `refunds-and-disputes`, `billing-sdk`, `better-auth-integration`.
 
 Two MCP servers (registered automatically):
 

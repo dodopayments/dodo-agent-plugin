@@ -13,7 +13,7 @@ This plugin conforms to the [Agent Plugins 1.0.0](https://agent-plugins.org/spec
 
 - **Dodo Payments API MCP server** - Live API access (payments, subscriptions, customers, products, refunds, licenses, usage). Authenticates via browser OAuth, no local credentials required.
 - **Dodo Knowledge MCP server** - No credentials. Semantic search over the current Dodo Payments documentation.
-- **Agent skills** - Seventeen integration guides, written as `SKILL.md` files with YAML frontmatter. Your agent loads the relevant skill on its own when a task calls for it.
+- **Agent skills** - Integration guides (listed [below](#included-skills)), written as `SKILL.md` files with YAML frontmatter. Your agent loads the relevant skill on its own when a task calls for it.
 
 ## Install
 
@@ -99,7 +99,7 @@ Point Kiro at the cloned folder. Skills load from `skills/`, MCP servers from `m
 gemini extensions install https://github.com/dodopayments/dodo-agent-plugin
 ```
 
-`gemini-extension.json` at the repo root is the manifest, and Gemini auto-discovers the `skills/` directory next to it. Verified on Gemini CLI 0.63.0: `gemini skills list` shows all seventeen skills and `gemini mcp list` shows both servers.
+`gemini-extension.json` at the repo root is the manifest, and Gemini auto-discovers the `skills/` directory next to it. Verified on Gemini CLI 0.63.0: `gemini skills list` shows every skill and `gemini mcp list` shows both servers.
 
 ### VS Code / GitHub Copilot
 
@@ -142,7 +142,7 @@ npm install --save-dev @dodopayments/opencode-plugin
 
 An absolute path works too, and avoids the local-install requirement.
 
-Verify with `opencode run "List every skill available to you by name."` - you should see all seventeen. A skills path that does not exist is ignored silently, so check rather than assume.
+Verify with `opencode run "List every skill available to you by name."` - you should see every skill listed under [Included Skills](#included-skills). A skills path that does not exist is ignored silently, so check rather than assume.
 
 > Versions before 0.5.0 documented these skills as auto-discovered. They were not: nothing in OpenCode scans an installed package, so OpenCode users had MCP servers but no skills. Setting `config.skills` from the plugin's `config` hook does not fix this either - the skill index is built before `config` hooks run, so it never registers anything.
 
