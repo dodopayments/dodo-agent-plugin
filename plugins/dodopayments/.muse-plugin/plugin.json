@@ -2,7 +2,7 @@
     "schemaVersion": 1,
     "name": "dodopayments",
     "displayName": "Dodo Payments",
-    "version": "0.6.0",
+    "version": "0.6.1",
     "description": "Dodo Payments for Muse Code: 18 integration agent skills plus the Dodo Payments API and documentation MCP servers.",
     "author": {
         "name": "Dodo Payments",

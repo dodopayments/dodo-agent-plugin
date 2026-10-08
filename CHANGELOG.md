@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.1 - 2026-10-08
+
+Skills resynced from [`dodopayments/skills`](https://github.com/dodopayments/skills) at `4594089`, which carries an audit of every skill against the current docs and SDK, and adds an eighteenth skill.
+
+### Fixed
+
+- **Broken examples** ([dodopayments/skills#13](https://github.com/dodopayments/skills/pull/13)): Express adapter body parsing, SvelteKit and Convex exports, renewal-failure and UPI test credentials, per-mode API keys, public license-key client construction, auto-fulfilled license events (`entitlement_grant.created`), numeric usage-meter properties, and the BillingSDK `Plan` shape.
+- **Stale and unsafe guidance** ([dodopayments/skills#14](https://github.com/dodopayments/skills/pull/14)): customer-portal routes resolve the customer from the signed-in session (was an IDOR); secret-key SDK calls split from browser redirects; subscription `past_due`/`paused` states and pause/resume; full webhook catalog and 30s timeout; correct checkout return-URL params; native PPP and Adaptive Currency; 10-day dispute window and per-item partial-refund revocation; license offline grace limited to connection errors; official iOS/Android checkout SDKs.
+
+### Added
+
+- **`dodo-mcp-usage` skill** ([dodopayments/skills#17](https://github.com/dodopayments/skills/pull/17)): when to use `dodo-knowledge` vs `dodopayments-api`, test-mode-first and confirm-before-live-write rules, auth and client setup, troubleshooting.
+
+### Changed
+
+- **Every skill description now says what and when** ([dodopayments/skills#17](https://github.com/dodopayments/skills/pull/17)), so agents pick the right skill from the description alone.
+- Partial refunds revoke exactly the items with nothing left to refund (read from payment line items); license grant webhooks apply only when newer, so out-of-order delivery cannot revive a revoked key.
+- The `best-practices` → `dodo-best-practices` vendoring transform is removed: upstream renamed the directory (dodopayments/skills#7).
+
 ## 0.6.0 - 2026-10-08
 
 Extends the plugin to Grok, Meta Muse Code, Antigravity, Junie and a long tail of other assistants, and removes the `mcp-remote` bridge everywhere.
