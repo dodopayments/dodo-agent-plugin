@@ -1,6 +1,6 @@
 {
     "name": "dodopayments",
-    "version": "0.6.4",
+    "version": "0.6.5",
     "description": "Dodo Payments tools for Codex: integration skills + API/docs MCP servers.",
     "author": {
         "name": "Dodo Payments",
@@ -40,7 +40,8 @@
             "Create a subscription checkout session with a 14-day trial.",
             "Implement usage-based billing with meters and events."
         ],
-        "brandColor": "#C6FE1E",
+        "brandColor": "#6E8E0C",
+        "brandColorDark": "#C6FE1E",
         "composerIcon": "./assets/icon.png",
         "logo": "./assets/logo.png"
     }

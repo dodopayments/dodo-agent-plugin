@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.5 - 2026-10-09
+
+### Fixed
+
+- Removed `extensions["com.openai"].review.test_cases`. The OpenAI portal rejects plugin-level test cases when a plugin bundles more than one MCP server ("Plugin-level test_cases require exactly one MCP server"), and this plugin ships two. The review test cases are entered in the portal instead. The demo recording, commerce declaration and release notes are unchanged.
+- OpenAI `brandColor` is now `#6E8E0C`, a darker lime with 3.8:1 contrast against white; the portal requires at least 2:1 and rejected `#C6FE1E`. The brand lime moves to `brandColorDark`.
+
 ## 0.6.4 - 2026-10-08
 
 ### Added
