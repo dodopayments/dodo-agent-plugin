@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.5 - 2026-10-09
+
+### Fixed
+
+- Removed `extensions["com.openai"].review.test_cases`. The OpenAI portal rejects plugin-level test cases when a plugin bundles more than one MCP server ("Plugin-level test_cases require exactly one MCP server"), and this plugin ships two. The review test cases are entered in the portal instead. The demo recording, commerce declaration and release notes are unchanged.
+
 ## 0.6.4 - 2026-10-08
 
 ### Added

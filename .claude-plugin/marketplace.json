@@ -6,7 +6,7 @@
     },
     "metadata": {
         "description": "Dodo Payments plugin marketplace for Claude Code.",
-        "version": "0.6.4"
+        "version": "0.6.5"
     },
     "plugins": [
         {

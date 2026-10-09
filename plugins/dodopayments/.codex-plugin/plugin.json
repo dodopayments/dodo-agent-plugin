@@ -1,6 +1,6 @@
 {
     "name": "dodopayments",
-    "version": "0.6.4",
+    "version": "0.6.5",
     "description": "Dodo Payments tools for Codex: integration skills + API/docs MCP servers.",
     "author": {
         "name": "Dodo Payments",
