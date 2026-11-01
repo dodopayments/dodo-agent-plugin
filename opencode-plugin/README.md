@@ -27,7 +27,7 @@ Restart OpenCode.
 - Both MCP servers are registered automatically via the plugin's `config` hook.
 - The `skills.paths` entry is what makes the skills visible - OpenCode does not scan installed packages for skills. The path resolves against the **project** directory, not OpenCode's plugin cache, which is why the local install above is required. An absolute path works too and avoids that requirement.
 - The plugin module exports only its default function. OpenCode's loader throws `Plugin export is not a function` on any non-function named export, skips the plugin, and swallows the error - leaving you with no MCP servers. Verified on OpenCode 1.18.15.
-- The first call to `dodopayments-api` opens a browser for OAuth. `dodo-knowledge` needs no auth.
+- The first call to `dodopayments-api` opens a Dodo Payments consent page in the browser: pick the business, mode and permissions. `opencode mcp auth dodopayments-api` starts the same sign-in. To review or revoke access, open the dashboard at **Settings > Connected Apps**. `dodo-knowledge` needs no auth.
 
 Verify the install:
 
@@ -67,25 +67,22 @@ Persist the toggle by exporting the var in your shell profile or a project `.env
 
 ## Overriding the defaults
 
-The plugin registers MCPs with nullish-assign semantics, so anything you declare in your own `opencode.json` wins. Example - swap the default remote OAuth server for the local stdio server with your own API key:
+The plugin registers MCPs with nullish-assign semantics, so anything you declare in your own `opencode.json` wins. Example - keep the API server declared but turned off:
 
 ```jsonc
 {
     "plugin": ["@dodopayments/opencode-plugin"],
     "mcp": {
         "dodopayments-api": {
-            "type": "local",
-            "command": ["npx", "-y", "dodopayments-mcp@latest"],
-            "environment": {
-                "DODO_PAYMENTS_API_KEY": "dodo_test_...",
-                "DODO_PAYMENTS_WEBHOOK_KEY": "whsec_...",
-                "DODO_PAYMENTS_ENVIRONMENT": "test_mode"
-            },
-            "enabled": true
+            "type": "remote",
+            "url": "https://mcp.dodopayments.com/mcp",
+            "enabled": false
         }
     }
 }
 ```
+
+The API server has no API key mode. Declare it only as the remote server above, which signs in with OAuth.
 
 `dodo-knowledge` continues to be registered by the plugin unless you declare it explicitly too.
 
