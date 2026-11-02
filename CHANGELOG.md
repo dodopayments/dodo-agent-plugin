@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.7.0 - 2026-11-02
+
+The API MCP server now signs in through the Dodo Payments authorization server at `auth.dodopayments.com`. The endpoint (`https://mcp.dodopayments.com/mcp`) and every client MCP config stay the same.
+
+### Changed
+
+- **Sign-in is a Dodo Payments consent page.** The first `dodopayments-api` tool call opens it: pick the business, mode and permissions. No step asks for an API key. Review or revoke access in the dashboard under **Settings > Connected Apps**. The README (new [Sign-in and access](./README.md#sign-in-and-access) section), the OpenCode README and the `dodo-mcp-usage` skill describe the flow.
+- **Dodo CLI sign-in.** The README, `testing-and-go-live` and the webhook local-testing reference use `npm i -g dodopayments-cli@3.7.0`, then `dodo login` (browser) or `dodo login --device` (SSH), `dodo whoami` and `dodo logout all`. They no longer tell you to paste an API key into `dodo login`.
+- `dodo-mcp-usage` names the API server tools (`search_docs`, `execute`), adds Cursor, Codex `config.toml` and OpenCode setup lines, ties the mode and least-privilege rules to the consent page, and explains permission errors.
+- OpenAI `publication.release_notes` in `plugin.json` describe the new sign-in.
+
+### Removed
+
+- **Local stdio API server setups** (`npx dodopayments-mcp` with `DODO_PAYMENTS_API_KEY`) from the README, the OpenCode README and `dodo-mcp-usage`. Every documented config uses the remote OAuth server.
+- **Claude Code `userConfig`** (`dodo_api_key`, `dodo_webhook_key`, `dodo_environment`). Only the removed stdio setup read these values, so **Configure options** in Claude Code no longer asks for an API key.
+
+The skill edits are made in the vendored `skills/` copy and upstream in [dodopayments/skills#39](https://github.com/dodopayments/skills/pull/39), so that the weekly sync keeps them.
+
 ## 0.6.5 - 2026-10-09
 
 ### Fixed
