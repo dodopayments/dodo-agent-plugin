@@ -224,12 +224,12 @@ Every client config in this repo dials `https://mcp.dodopayments.com/mcp` direct
 The skills use the Dodo CLI for local webhook testing. It uses the same OAuth sign-in:
 
 ```bash
-npm i -g dodopayments-cli@3.7.0
-dodo login            # sign in with the browser
-dodo login --device   # over SSH or with no browser: enter a code on another device
-dodo whoami           # show the stored sign-in
-dodo logout all       # sign out
+npm i -g dodopayments-cli   # browser sign-in needs v3.7.0 or later
+dodo login                  # sign in with the browser
+dodo whoami                 # show the stored sign-in
 ```
+
+Over SSH or with no browser, run `dodo login --device` in place of `dodo login`, and enter the code on another device. To sign out when you finish, run `dodo logout all`.
 
 ## Enable / disable individual MCP servers
 
