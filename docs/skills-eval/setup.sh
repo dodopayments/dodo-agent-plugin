@@ -54,7 +54,8 @@ for task in t1 t2 t3; do
     "dodo-knowledge": { "type": "remote", "url": "https://knowledge.dodopayments.com/mcp", "enabled": true } } }
 EOF
     fi
-    cp -c -R deps/$kind/node_modules deps/$kind/package-lock.json $d/
+    # Copy-on-write clone where supported (macOS APFS), plain copy otherwise.
+    cp -c -R deps/$kind/node_modules deps/$kind/package-lock.json $d/ 2>/dev/null || cp -R deps/$kind/node_modules deps/$kind/package-lock.json $d/
     printf 'node_modules/\n' > $d/.gitignore
     (cd $d && git init -q && git add -A && git -c user.email=b@b -c user.name=bench commit -qm starter)
   done
