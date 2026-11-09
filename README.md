@@ -185,7 +185,7 @@ Tools:
 | `read_docs_page` | Returns a docs page as markdown |
 | `search` | Finds SDK and API methods |
 | `execute` | Runs TypeScript SDK code against the signed-in account, in a sandbox |
-| `feedback` | Sends a note to Dodo, with emails, IDs and keys removed first |
+| `feedback` | Sends a note to the Dodo team, who triage each one; emails, IDs and keys are removed first |
 
 The server speaks Streamable HTTP over HTTPS, and every manifest dials it natively - no `npx mcp-remote` bridge and no Node dependency. The canonical `mcp.json` uses the spec's `type: "streamable-http"`; the generated `.mcp.json` (Claude Code, Cursor, VS Code, Grok Build, Devin, Goose, Droid) uses the same endpoint spelled `type: "http"`, the name that dialect uses; Muse, Antigravity, Junie and Gemini get their own spellings from the generator.
 
@@ -199,7 +199,7 @@ The MCP server signs in with OAuth. No config in this plugin holds an API key, a
 
 To review or revoke access, open the Dodo Payments dashboard at **Settings > Connected Apps**.
 
-Every client config in this repo dials `https://mcp.dodopayments.com/mcp` directly, sets no headers, and lets the client run OAuth discovery itself. A host that cannot run MCP OAuth can use `https://mcp.dodopayments.com/mcp?auth=optional`: `search_docs`, `read_docs_page`, `search` and `feedback` work without an account, and `execute` returns 401. Today that is the xAI API (see [Grok](./docs/clients/grok.md)).
+Every client config in this repo dials `https://mcp.dodopayments.com/mcp` directly, sets no headers, and lets the client run OAuth discovery itself. A host that cannot run MCP OAuth can use `https://mcp.dodopayments.com/mcp?auth=optional`: `search_docs`, `read_docs_page` and `search` work without an account, and `execute` and `feedback` return 401. Today that is the xAI API (see [Grok](./docs/clients/grok.md)).
 
 ### Dodo CLI
 
