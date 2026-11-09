@@ -1,0 +1,137 @@
+[
+ {
+  "run": "t1-none",
+  "seconds": 154,
+  "steps": 27,
+  "base_context_tokens": 10614,
+  "tokens_processed": 1757627,
+  "output_tokens": 10853,
+  "cost_usd": 0.666,
+  "skills": [],
+  "mcp_calls": [],
+  "typecheck": "pass",
+  "typecheck_errors": 0,
+  "verifies_webhook": true,
+  "raw_body": true,
+  "test_mode": true,
+  "event_names": [
+   "payment.succeeded"
+  ],
+  "invalid_event_names": []
+ },
+ {
+  "run": "t1-plugin",
+  "seconds": 153,
+  "steps": 24,
+  "base_context_tokens": 14538,
+  "tokens_processed": 1392174,
+  "output_tokens": 9063,
+  "cost_usd": 0.544,
+  "skills": [
+   "checkout-integration",
+   "webhook-integration"
+  ],
+  "mcp_calls": [],
+  "typecheck": "pass",
+  "typecheck_errors": 0,
+  "verifies_webhook": true,
+  "raw_body": true,
+  "test_mode": true,
+  "event_names": [
+   "payment.succeeded"
+  ],
+  "invalid_event_names": []
+ },
+ {
+  "run": "t2-none",
+  "seconds": 258,
+  "steps": 29,
+  "base_context_tokens": 10668,
+  "tokens_processed": 2062595,
+  "output_tokens": 20537,
+  "cost_usd": 0.829,
+  "skills": [],
+  "mcp_calls": [],
+  "typecheck": "pass",
+  "typecheck_errors": 0,
+  "verifies_webhook": true,
+  "raw_body": true,
+  "test_mode": true,
+  "event_names": [
+   "subscription.active",
+   "subscription.cancelled",
+   "subscription.on_hold",
+   "subscription.renewed"
+  ],
+  "invalid_event_names": []
+ },
+ {
+  "run": "t2-plugin",
+  "seconds": 145,
+  "steps": 20,
+  "base_context_tokens": 14592,
+  "tokens_processed": 1574803,
+  "output_tokens": 7716,
+  "cost_usd": 0.639,
+  "skills": [
+   "dodo-best-practices",
+   "checkout-integration",
+   "subscription-integration",
+   "webhook-integration"
+  ],
+  "mcp_calls": [
+   "dodo-knowledge_search_docs",
+   "dodo-knowledge_search_docs"
+  ],
+  "typecheck": "pass",
+  "typecheck_errors": 0,
+  "verifies_webhook": true,
+  "raw_body": true,
+  "test_mode": true,
+  "event_names": [
+   "subscription.active",
+   "subscription.cancelled",
+   "subscription.on_hold",
+   "subscription.renewed"
+  ],
+  "invalid_event_names": []
+ },
+ {
+  "run": "t3-none",
+  "seconds": 51,
+  "steps": 10,
+  "base_context_tokens": 10618,
+  "tokens_processed": 172271,
+  "output_tokens": 3027,
+  "cost_usd": 0.113,
+  "skills": [],
+  "mcp_calls": [],
+  "typecheck": "pass",
+  "typecheck_errors": 0,
+  "verifies_webhook": null,
+  "raw_body": null,
+  "test_mode": false,
+  "event_names": [],
+  "invalid_event_names": []
+ },
+ {
+  "run": "t3-plugin",
+  "seconds": 93,
+  "steps": 11,
+  "base_context_tokens": 14542,
+  "tokens_processed": 299805,
+  "output_tokens": 4768,
+  "cost_usd": 0.181,
+  "skills": [
+   "usage-based-billing"
+  ],
+  "mcp_calls": [],
+  "typecheck": "pass",
+  "typecheck_errors": 0,
+  "verifies_webhook": null,
+  "raw_body": null,
+  "test_mode": true,
+  "event_names": [],
+  "invalid_event_names": []
+ }
+]

@@ -1,0 +1,13 @@
+{
+  "name": "dodo-search-eval",
+  "private": true,
+  "type": "module",
+  "description": "Docs search evaluation for the Dodo Payments MCP servers. See ../mcp-and-skills-consolidation-plan.md.",
+  "scripts": {
+    "run": "node run.mjs",
+    "score": "node score.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1"
+  }
+}

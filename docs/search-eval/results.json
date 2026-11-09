@@ -1,0 +1,1134 @@
+{
+ "summary": {
+  "knowledge": {
+   "top1": "24/30",
+   "top3": "27/30",
+   "top5": "27/30",
+   "mrr5": "0.85",
+   "tokensMedian": 1386,
+   "tokensP95": 2136,
+   "msP50": 1257,
+   "msP95": 2619,
+   "resultsMedian": 5,
+   "repeatResults": 73
+  },
+  "mintlify": {
+   "top1": "20/30",
+   "top3": "27/30",
+   "top5": "29/30",
+   "mrr5": "0.79",
+   "tokensMedian": 8112,
+   "tokensP95": 11750,
+   "msP50": 719,
+   "msP95": 2275,
+   "resultsMedian": 10,
+   "repeatResults": 0
+  },
+  "mintlify top-5": {
+   "top1": "20/30",
+   "top3": "27/30",
+   "top5": "29/30",
+   "mrr5": "0.79",
+   "tokensMedian": 3114,
+   "tokensP95": 6892,
+   "msP50": 719,
+   "msP95": 2275,
+   "resultsMedian": 5,
+   "repeatResults": 0
+  },
+  "hybrid": {
+   "top1": "24/30",
+   "top3": "29/30",
+   "top5": "29/30",
+   "mrr5": "0.87",
+   "tokensMedian": 2276,
+   "tokensP95": 6916,
+   "msP50": 1280,
+   "msP95": 2705,
+   "resultsMedian": 5,
+   "repeatResults": 0
+  }
+ },
+ "perQ": [
+  {
+   "id": 1,
+   "q": "webhook event names for subscription renewal",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks/intents/subscription",
+     "/developer-resources/webhooks/intents/webhook-events-guide",
+     "/features/subscription"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks/intents/subscription",
+     "/miscellaneous/faq",
+     "/features/subscription"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks/intents/subscription",
+     "/miscellaneous/faq",
+     "/features/subscription"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks/intents/subscription",
+     "/developer-resources/webhooks/intents/webhook-events-guide",
+     "/miscellaneous/faq"
+    ]
+   }
+  },
+  {
+   "id": 2,
+   "q": "change subscription plan with proration",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/subscription-upgrade-downgrade",
+     "/developer-resources/subscription-upgrade-downgrade",
+     "/developer-resources/subscription-upgrade-downgrade"
+    ]
+   },
+   "mintlify": {
+    "rank": 5,
+    "top3": [
+     "/features/subscription",
+     "/features/localized-pricing",
+     "/developer-resources/subscription-integration-guide"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 5,
+    "top3": [
+     "/features/subscription",
+     "/features/localized-pricing",
+     "/developer-resources/subscription-integration-guide"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/subscription-upgrade-downgrade",
+     "/features/subscription",
+     "/features/localized-pricing"
+    ]
+   }
+  },
+  {
+   "id": 3,
+   "q": "verify webhook signature in Next.js",
+   "knowledge": {
+    "rank": 2,
+    "top3": [
+     "/developer-resources/subscription-upgrade-downgrade",
+     "/developer-resources/nextjs-adaptor",
+     "/developer-resources/nextjs-adaptor"
+    ]
+   },
+   "mintlify": {
+    "rank": 2,
+    "top3": [
+     "/developer-resources/build-with-ai-coding-agents",
+     "/developer-resources/nextjs-adaptor",
+     "/developer-resources/webhooks"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 2,
+    "top3": [
+     "/developer-resources/build-with-ai-coding-agents",
+     "/developer-resources/nextjs-adaptor",
+     "/developer-resources/webhooks"
+    ]
+   },
+   "hybrid": {
+    "rank": 3,
+    "top3": [
+     "/developer-resources/subscription-upgrade-downgrade",
+     "/developer-resources/build-with-ai-coding-agents",
+     "/developer-resources/nextjs-adaptor"
+    ]
+   }
+  },
+  {
+   "id": 4,
+   "q": "create checkout session with discount code",
+   "knowledge": {
+    "rank": 2,
+    "top3": [
+     "/features/checkout",
+     "/features/discount-codes",
+     "/developer-resources/checkout-session"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/features/discount-codes",
+     "/developer-resources/checkout-session",
+     "/api-reference/checkout-sessions/create"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/features/discount-codes",
+     "/developer-resources/checkout-session",
+     "/api-reference/checkout-sessions/create"
+    ]
+   },
+   "hybrid": {
+    "rank": 2,
+    "top3": [
+     "/features/checkout",
+     "/features/discount-codes",
+     "/developer-resources/checkout-session"
+    ]
+   }
+  },
+  {
+   "id": 5,
+   "q": "usage based billing meter event ingestion",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/usage-based-billing/event-ingestion",
+     "/developer-resources/sdks/java",
+     "/features/usage-based-billing/introduction"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/features/usage-based-billing/event-ingestion",
+     "/features/usage-based-billing/introduction",
+     "/features/usage-based-billing/meters"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/features/usage-based-billing/event-ingestion",
+     "/features/usage-based-billing/introduction",
+     "/features/usage-based-billing/meters"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/usage-based-billing/event-ingestion",
+     "/developer-resources/sdks/java",
+     "/features/usage-based-billing/introduction"
+    ]
+   }
+  },
+  {
+   "id": 6,
+   "q": "credit entitlements rollover and expiry",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/credit-based-billing",
+     "/features/credit-based-billing",
+     "/features/credit-based-billing"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/features/credit-based-billing",
+     "/api-reference/credit-entitlements/update-credit-entitlement",
+     "/changelog/v1.86.0"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/features/credit-based-billing",
+     "/api-reference/credit-entitlements/update-credit-entitlement",
+     "/changelog/v1.86.0"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/credit-based-billing",
+     "/api-reference/credit-entitlements/update-credit-entitlement",
+     "/changelog/v1.86.0"
+    ]
+   }
+  },
+  {
+   "id": 7,
+   "q": "license key activation limit",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/license-keys",
+     "/features/license-keys",
+     "/features/license-keys"
+    ]
+   },
+   "mintlify": {
+    "rank": 2,
+    "top3": [
+     "/api-reference/error-codes",
+     "/api-reference/licenses/activate-license",
+     "/developer-resources/manual-license-key-fulfillment"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 2,
+    "top3": [
+     "/api-reference/error-codes",
+     "/api-reference/licenses/activate-license",
+     "/developer-resources/manual-license-key-fulfillment"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/license-keys",
+     "/api-reference/error-codes",
+     "/api-reference/licenses/activate-license"
+    ]
+   }
+  },
+  {
+   "id": 8,
+   "q": "refund partial payment API",
+   "knowledge": {
+    "rank": 2,
+    "top3": [
+     "/developer-resources/raw-card-api",
+     "/features/transactions/refunds",
+     "/features/transactions/refunds"
+    ]
+   },
+   "mintlify": {
+    "rank": 2,
+    "top3": [
+     "/changelog/v1.86.0",
+     "/features/transactions/refunds",
+     "/api-reference/refunds/get-refunds"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 2,
+    "top3": [
+     "/changelog/v1.86.0",
+     "/features/transactions/refunds",
+     "/api-reference/refunds/get-refunds"
+    ]
+   },
+   "hybrid": {
+    "rank": 3,
+    "top3": [
+     "/developer-resources/raw-card-api",
+     "/changelog/v1.86.0",
+     "/features/transactions/refunds"
+    ]
+   }
+  },
+  {
+   "id": 9,
+   "q": "which headers does Dodo send with a webhook (webhook-id, webhook-signature, webhook-timestamp)",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks",
+     "/https://github.com/dodopayments/dodo-adapters/blob/main/packages/betterauth/README",
+     "/developer-resources/webhooks"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks",
+     "/developer-resources/sdks/cli",
+     "/api-reference/webhooks/get-webhook-headers"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks",
+     "/developer-resources/sdks/cli",
+     "/api-reference/webhooks/get-webhook-headers"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks",
+     "/https://github.com/dodopayments/dodo-adapters/blob/main/packages/betterauth/README",
+     "/developer-resources/sdks/cli"
+    ]
+   }
+  },
+  {
+   "id": 10,
+   "q": "embed checkout as an overlay modal on my website",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/overlay-checkout",
+     "/developer-resources/inline-checkout",
+     "/developer-resources/overlay-checkout"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/overlay-checkout",
+     "/developer-resources/inline-checkout",
+     "/integrations/gohighlevel"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/overlay-checkout",
+     "/developer-resources/inline-checkout",
+     "/integrations/gohighlevel"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/overlay-checkout",
+     "/developer-resources/inline-checkout",
+     "/integrations/gohighlevel"
+    ]
+   }
+  },
+  {
+   "id": 11,
+   "q": "inline checkout embedded in page instead of redirect",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/inline-checkout",
+     "/developer-resources/inline-checkout",
+     "/developer-resources/overlay-checkout"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/inline-checkout",
+     "/integrations/gohighlevel",
+     "/developer-resources/overlay-checkout"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/inline-checkout",
+     "/integrations/gohighlevel",
+     "/developer-resources/overlay-checkout"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/inline-checkout",
+     "/integrations/gohighlevel",
+     "/developer-resources/overlay-checkout"
+    ]
+   }
+  },
+  {
+   "id": 12,
+   "q": "start a subscription with a free trial period",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/subscription",
+     "/features/subscription",
+     "/features/subscription"
+    ]
+   },
+   "mintlify": {
+    "rank": 3,
+    "top3": [
+     "/developer-resources/mobile-integration",
+     "/developer-resources/checkout-session",
+     "/features/subscription"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 3,
+    "top3": [
+     "/developer-resources/mobile-integration",
+     "/developer-resources/checkout-session",
+     "/features/subscription"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/subscription",
+     "/developer-resources/mobile-integration",
+     "/developer-resources/checkout-session"
+    ]
+   }
+  },
+  {
+   "id": 13,
+   "q": "cancel subscription at end of billing period",
+   "knowledge": {
+    "rank": 0,
+    "top3": [
+     "/developer-resources/ondemand-subscriptions",
+     "/features/customer-portal",
+     "/integrations/payglue"
+    ]
+   },
+   "mintlify": {
+    "rank": 3,
+    "top3": [
+     "/changelog/v1.109.0",
+     "/developer-resources/build-with-ai-coding-agents",
+     "/features/subscription"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 3,
+    "top3": [
+     "/changelog/v1.109.0",
+     "/developer-resources/build-with-ai-coding-agents",
+     "/features/subscription"
+    ]
+   },
+   "hybrid": {
+    "rank": 0,
+    "top3": [
+     "/developer-resources/ondemand-subscriptions",
+     "/changelog/v1.109.0",
+     "/features/customer-portal"
+    ]
+   }
+  },
+  {
+   "id": 14,
+   "q": "charge a customer on demand for an existing subscription",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/ondemand-subscriptions",
+     "/developer-resources/ondemand-subscriptions",
+     "/developer-resources/subscription-integration-guide"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/ondemand-subscriptions",
+     "/features/subscription",
+     "/features/hybrid-billing"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/ondemand-subscriptions",
+     "/features/subscription",
+     "/features/hybrid-billing"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/ondemand-subscriptions",
+     "/features/subscription",
+     "/developer-resources/subscription-integration-guide"
+    ]
+   }
+  },
+  {
+   "id": 15,
+   "q": "what happens when a subscription renewal payment fails dunning retries",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/recovery/subscription-dunning",
+     "/features/recovery/payment-retries",
+     "/features/recovery/subscription-dunning"
+    ]
+   },
+   "mintlify": {
+    "rank": 2,
+    "top3": [
+     "/miscellaneous/faq",
+     "/features/recovery/payment-retries",
+     "/features/recovery/subscription-dunning"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 2,
+    "top3": [
+     "/miscellaneous/faq",
+     "/features/recovery/payment-retries",
+     "/features/recovery/subscription-dunning"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/recovery/subscription-dunning",
+     "/miscellaneous/faq",
+     "/features/recovery/payment-retries"
+    ]
+   }
+  },
+  {
+   "id": 16,
+   "q": "create customer portal session so users can manage billing",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/api-reference/customers/create-customer-portal-session",
+     "/features/customer-portal",
+     "/features/customers"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/features/customer-portal",
+     "/api-reference/customers/create-customer-portal-session",
+     "/features/customers"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/features/customer-portal",
+     "/api-reference/customers/create-customer-portal-session",
+     "/features/customers"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/api-reference/customers/create-customer-portal-session",
+     "/features/customer-portal",
+     "/features/customers"
+    ]
+   }
+  },
+  {
+   "id": 17,
+   "q": "test card numbers for successful and declined payments in test mode",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/miscellaneous/testing-process",
+     "/features/payment-methods/cards",
+     "/miscellaneous/testing-process"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/miscellaneous/testing-process",
+     "/features/payment-methods/cards",
+     "/miscellaneous/test-mode-vs-live-mode"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/miscellaneous/testing-process",
+     "/features/payment-methods/cards",
+     "/miscellaneous/test-mode-vs-live-mode"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/miscellaneous/testing-process",
+     "/features/payment-methods/cards",
+     "/miscellaneous/test-mode-vs-live-mode"
+    ]
+   }
+  },
+  {
+   "id": 18,
+   "q": "difference between test mode and live mode API base URL",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/miscellaneous/test-mode-vs-live-mode",
+     "/miscellaneous/test-mode-vs-live-mode",
+     "/miscellaneous/test-mode-vs-live-mode"
+    ]
+   },
+   "mintlify": {
+    "rank": 2,
+    "top3": [
+     "/miscellaneous/faq",
+     "/miscellaneous/test-mode-vs-live-mode",
+     "/api-reference/introduction"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 2,
+    "top3": [
+     "/miscellaneous/faq",
+     "/miscellaneous/test-mode-vs-live-mode",
+     "/api-reference/introduction"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/miscellaneous/test-mode-vs-live-mode",
+     "/miscellaneous/faq",
+     "/api-reference/introduction"
+    ]
+   }
+  },
+  {
+   "id": 19,
+   "q": "purchasing power parity discounts by country",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/purchasing-power-parity",
+     "/features/purchasing-power-parity",
+     "/features/purchasing-power-parity"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/features/purchasing-power-parity",
+     "/changelog/v1.113.6",
+     "/integrations/paritydeals"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/features/purchasing-power-parity",
+     "/changelog/v1.113.6",
+     "/integrations/paritydeals"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/purchasing-power-parity",
+     "/changelog/v1.113.6",
+     "/integrations/paritydeals"
+    ]
+   }
+  },
+  {
+   "id": 20,
+   "q": "set different fixed prices per currency for a product",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/localized-pricing",
+     "/features/localized-pricing",
+     "/features/localized-pricing"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/features/localized-pricing",
+     "/features/products",
+     "/features/adaptive-currency"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/features/localized-pricing",
+     "/features/products",
+     "/features/adaptive-currency"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/localized-pricing",
+     "/features/products",
+     "/features/adaptive-currency"
+    ]
+   }
+  },
+  {
+   "id": 21,
+   "q": "Express adapter for checkout and webhooks",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/express-adaptor",
+     "/https://github.com/dodopayments/dodo-adapters/blob/main/README",
+     "/developer-resources/framework-adaptors"
+    ]
+   },
+   "mintlify": {
+    "rank": 6,
+    "top3": [
+     "/developer-resources/framework-adaptors",
+     "/developer-resources/webhooks",
+     "/introduction"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 0,
+    "top3": [
+     "/developer-resources/framework-adaptors",
+     "/developer-resources/webhooks",
+     "/introduction"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/express-adaptor",
+     "/developer-resources/framework-adaptors",
+     "/https://github.com/dodopayments/dodo-adapters/blob/main/README"
+    ]
+   }
+  },
+  {
+   "id": 22,
+   "q": "Better Auth plugin integration for Dodo Payments",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/better-auth-adaptor",
+     "/https://github.com/dodopayments/dodo-adapters/blob/main/packages/betterauth/README",
+     "/https://github.com/dodopayments/dodo-adapters/blob/main/packages/betterauth/README"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/better-auth-adaptor",
+     "/developer-resources/sdks/cli",
+     "/integrations/woocommerce-plugin"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/better-auth-adaptor",
+     "/developer-resources/sdks/cli",
+     "/integrations/woocommerce-plugin"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/better-auth-adaptor",
+     "/https://github.com/dodopayments/dodo-adapters/blob/main/packages/betterauth/README",
+     "/developer-resources/sdks/cli"
+    ]
+   }
+  },
+  {
+   "id": 23,
+   "q": "accept payments in a React Native app",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/sdks/react-native",
+     "/developer-resources/sdks/react-native",
+     "/developer-resources/mobile-integration"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/sdks/react-native",
+     "/introduction",
+     "/features/payment-methods"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/sdks/react-native",
+     "/introduction",
+     "/features/payment-methods"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/sdks/react-native",
+     "/introduction",
+     "/developer-resources/mobile-integration"
+    ]
+   }
+  },
+  {
+   "id": 24,
+   "q": "install the Python SDK and create a client with bearer token",
+   "knowledge": {
+    "rank": 0,
+    "top3": [
+     "/developer-resources/dodo-payments-sdks",
+     "/https://github.com/dodopayments/dodopayments-python/blob/main/README",
+     "/https://github.com/dodopayments/dodopayments-python/blob/main/README"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/sdks/python",
+     "/developer-resources/dodo-payments-sdks",
+     "/developer-resources/sdks/csharp"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/sdks/python",
+     "/developer-resources/dodo-payments-sdks",
+     "/developer-resources/sdks/csharp"
+    ]
+   },
+   "hybrid": {
+    "rank": 2,
+    "top3": [
+     "/developer-resources/dodo-payments-sdks",
+     "/developer-resources/sdks/python",
+     "/https://github.com/dodopayments/dodopayments-python/blob/main/README"
+    ]
+   }
+  },
+  {
+   "id": 25,
+   "q": "add-ons for subscription products",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/addons",
+     "/features/addons",
+     "/features/addons"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/features/addons",
+     "/api-reference/error-codes",
+     "/features/subscription"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/features/addons",
+     "/api-reference/error-codes",
+     "/features/subscription"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/addons",
+     "/api-reference/error-codes",
+     "/features/subscription"
+    ]
+   }
+  },
+  {
+   "id": 26,
+   "q": "seat based pricing per user",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/seat-based-billing",
+     "/features/seat-based-billing",
+     "/features/seat-based-billing"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/features/seat-based-billing",
+     "/developer-resources/seat-based-pricing",
+     "/miscellaneous/faq"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/features/seat-based-billing",
+     "/developer-resources/seat-based-pricing",
+     "/miscellaneous/faq"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/seat-based-billing",
+     "/developer-resources/seat-based-pricing",
+     "/miscellaneous/faq"
+    ]
+   }
+  },
+  {
+   "id": 27,
+   "q": "handle chargeback dispute webhook events",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks/intents/dispute",
+     "/developer-resources/webhooks/intents/dispute",
+     "/developer-resources/webhooks/intents/webhook-events-guide"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks/intents/dispute",
+     "/integrations/windmill",
+     "/developer-resources/webhooks/intents/webhook-events-guide"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks/intents/dispute",
+     "/integrations/windmill",
+     "/developer-resources/webhooks/intents/webhook-events-guide"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/webhooks/intents/dispute",
+     "/integrations/windmill",
+     "/developer-resources/webhooks/intents/webhook-events-guide"
+    ]
+   }
+  },
+  {
+   "id": 28,
+   "q": "API error codes and what they mean",
+   "knowledge": {
+    "rank": 0,
+    "top3": [
+     "/features/moderation",
+     "/https://github.com/dodopayments/dodopayments-typescript/blob/main/README",
+     "/developer-resources/subscription-upgrade-downgrade"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/api-reference/error-codes",
+     "/api-reference/introduction",
+     "/api-reference/transaction-failures"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/api-reference/error-codes",
+     "/api-reference/introduction",
+     "/api-reference/transaction-failures"
+    ]
+   },
+   "hybrid": {
+    "rank": 2,
+    "top3": [
+     "/features/moderation",
+     "/api-reference/error-codes",
+     "/https://github.com/dodopayments/dodopayments-typescript/blob/main/README"
+    ]
+   }
+  },
+  {
+   "id": 29,
+   "q": "track LLM token usage and bill per token",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/ingestion-blueprints/llm",
+     "/developer-resources/ingestion-blueprints/llm",
+     "/developer-resources/ingestion-blueprints/llm"
+    ]
+   },
+   "mintlify": {
+    "rank": 5,
+    "top3": [
+     "/developer-resources/billing-deconstructions/openai",
+     "/developer-resources/billing-deconstructions/cursor",
+     "/features/usage-based-billing/introduction"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 5,
+    "top3": [
+     "/developer-resources/billing-deconstructions/openai",
+     "/developer-resources/billing-deconstructions/cursor",
+     "/features/usage-based-billing/introduction"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/developer-resources/ingestion-blueprints/llm",
+     "/developer-resources/billing-deconstructions/openai",
+     "/developer-resources/billing-deconstructions/cursor"
+    ]
+   }
+  },
+  {
+   "id": 30,
+   "q": "grant GitHub repository access after purchase",
+   "knowledge": {
+    "rank": 1,
+    "top3": [
+     "/features/entitlements/github",
+     "/features/entitlements/github",
+     "/features/entitlements/github"
+    ]
+   },
+   "mintlify": {
+    "rank": 1,
+    "top3": [
+     "/features/entitlements/github",
+     "/features/entitlements/introduction",
+     "/developer-resources/terraform-provider"
+    ]
+   },
+   "mintlify top-5": {
+    "rank": 1,
+    "top3": [
+     "/features/entitlements/github",
+     "/features/entitlements/introduction",
+     "/developer-resources/terraform-provider"
+    ]
+   },
+   "hybrid": {
+    "rank": 1,
+    "top3": [
+     "/features/entitlements/github",
+     "/features/entitlements/introduction",
+     "/developer-resources/terraform-provider"
+    ]
+   }
+  }
+ ]
+}
