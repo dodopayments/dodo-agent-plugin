@@ -251,6 +251,28 @@ Problems found in Mintlify:
 - **It returns 10 large results.** Even limited to the first 5, the p95 is 6.9k tokens. The combined backend must cap each result at about 400 tokens to stay under the 2k cap.
 - **Its ranking is weaker on guides.** It gave changelog pages and `billing-deconstructions` higher ranks than the actual guides ("cancel subscription", "LLM token billing").
 
+### After the `dodo-knowledge` fixes (2026-11-09, same day)
+
+Two of the three fixes shipped in dodopayments/context-mcp#124 and were deployed:
+
+- One result per page: the Worker reranks every fetched chunk and then keeps the best chunk of each page.
+- The hand-written `api-reference/` pages are indexed (new source `dodo-api-guides`, 4 pages, 48 chunks), with an incremental reindex from dodopayments/devops#3665.
+
+Docs pages are not yet weighted above the GitHub READMEs.
+
+Same 30 questions, against prod (`raw-after.json`, `results-after.json`):
+
+| Backend | Top-1 | Top-3 | MRR@5 | Repeated pages (of 150) | Tokens (median / p95) |
+|---|---|---|---|---|---|
+| `dodo-knowledge` before | 24/30 | 27/30 | 0.85 | 73 | 1.4k / 2.1k |
+| `dodo-knowledge` after | 24/30 | **29/30** | **0.88** | **0** | 1.3k / 2.3k |
+| Combined after | 24/30 | 29/30 | 0.87 | 0 | 2.0k / 6.8k |
+
+- "API error codes" now returns `/api-reference/error-codes` at rank 1.
+- "Change plan with proration" now returns 5 different pages.
+- The only miss left is "cancel subscription at end of billing period", which is likely a docs gap (see above).
+- `dodo-knowledge` alone now matches the combined backend on top-3 and beats it on MRR, at about two thirds of the tokens. Mintlify's extra hits came from pages that `dodo-knowledge` used to fill with repeats. Workstream A should start with `dodo-knowledge` alone and add Mintlify only if the next question set, drawn from support tickets, shows a gap.
+
 Decision for workstream A:
 
 - **Backend.** `search_docs` uses both backends combined, called in parallel through the service binding. Each result is capped at about 400 tokens, and the response at 5 results and 2k tokens.
@@ -266,6 +288,60 @@ Limits of this run:
 - The correct-page sets were written by one person.
 - The combined result is simulated, not a live implementation.
 - Latency was measured from a single location.
+
+## Skills baseline (2026-11-09)
+
+The current plugin compared with no plugin, before any skills change. This is a small run: 3 tasks, 2 setups, 1 model, 1 run each. It sets the baseline the new skill must match. It does not show a significant difference.
+
+Setup:
+
+- **Agent:** OpenCode 1.18.34 with `anthropic/claude-sonnet-5`. A clean config (`opencode-clean.json`) has no user skills, no Claude Code files, and no reads outside the project.
+- **Plugin setup:** the 18 current skills in `.opencode/skills/`, plus both MCP servers. Nobody is signed in to `dodopayments-api`, so this is what a new user gets.
+- **Starters:** each task starts from a fresh starter that compiles: Next.js 16 for t1, Express 5 for t2 and t3. Each has `dodopayments@2.61.1` and `standardwebhooks` installed.
+- **Tasks:**
+  - **t1:** one-time checkout and a webhook in Next.js.
+  - **t2:** in Express, a subscription checkout, a plan change, and subscription webhooks.
+  - **t3:** usage events for each API call in Express.
+- **Checks:**
+  - `tsc --noEmit`;
+  - whether the webhook signature is verified, and whether that is done on the raw body;
+  - whether event names are valid (against the 48 in the SDK types);
+  - whether test mode is used;
+  - tokens and cost, from OpenCode's step events.
+- **Files:** in [`skills-eval/`](skills-eval/): `setup.sh`, `run.sh`, `tasks.json`, `score.py`, and `scores.json`. Each run's own files are not kept.
+
+| Run | Time | Steps | Context at step 1 | Tokens processed | Cost | Skills loaded | MCP calls | Typecheck | Webhook verified (raw body) | Test mode |
+|---|---|---|---|---|---|---|---|---|---|---|
+| t1 none | 154 s | 27 | 10.6k | 1.76M | $0.67 | – | 0 | pass | yes | yes |
+| t1 plugin | 153 s | 24 | 14.5k | 1.39M | $0.54 | checkout, webhook | 0 | pass | yes | yes |
+| t2 none | 258 s | 29 | 10.7k | 2.06M | $0.83 | – | 0 | pass | yes | yes |
+| t2 plugin | 145 s | 20 | 14.6k | 1.57M | $0.64 | best-practices, checkout, subscription, webhook | 2 | pass | yes | yes |
+| t3 none | 51 s | 10 | 10.6k | 0.17M | $0.11 | – | 0 | pass | n/a | **no** |
+| t3 plugin | 93 s | 11 | 14.5k | 0.30M | $0.18 | usage-based-billing | 0 | pass | n/a | yes |
+
+What this shows:
+
+- **Both setups produce working code.**
+  - All 6 runs typecheck.
+  - All 4 webhook runs verify the signature on the raw body. t2 without the plugin keeps the raw bytes through `express.json({ verify })`.
+  - No run used an invalid event name.
+  - Sonnet already knows the SDK well enough for these tasks.
+- **The plugin costs about 3.9k tokens of context on every step** (14.5k vs 10.6k at step 1). That is skill descriptions plus MCP tool definitions. It is more than the 1.8k estimated under Metrics, which counted only the always-loaded descriptions. This is the main number the new plugin has to bring down.
+- **On the larger tasks the plugin saved steps and money.** t1 cost 18% less and t2 23% less, with fewer steps. On the small task (t3) it cost 60% more, because loading the skill was most of the work. That is the cost the single skill and its smaller entry file should remove.
+- **The plugin's one clear gain was test mode on t3.** Without the plugin, the agent did not set `test_mode` at all.
+- **Skill choice is noisy.** t2 loaded 4 skills, including `dodo-best-practices`, which repeats the others. The MCP was called twice, for webhook payload fields.
+
+Limits:
+
+- One run per cell, one model, no Haiku or Opus.
+- The checks are static. Nothing was run against the test API.
+- The "new plugin" setup comes later (phase 3).
+
+For phase 3:
+
+- Add the new plugin as a third setup.
+- Add Haiku, and run each cell 3 times.
+- Ship if it keeps these checks passing, keeps test mode, and has under 11k context at step 1, close to having no plugin.
 
 ## Order of work
 
