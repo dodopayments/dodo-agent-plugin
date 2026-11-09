@@ -45,6 +45,13 @@ const EXPECTED_SKILL_NAMES = JSON.parse(
     readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", ".skills-source.json"), "utf8"),
 ).skills;
 
+/** Limits from Anthropic's skill authoring guidelines, tightened for context cost. */
+const SKILL_MD_MAX_LINES = 150;
+const REFERENCE_TOC_THRESHOLD = 100;
+
+/** Line count, where a trailing newline ends the last line rather than starting another. */
+const lineCount = (text) => text.split("\n").length - (text.endsWith("\n") ? 1 : 0);
+
 /** True when `child` is inside `parent`, by path boundary rather than string prefix. */
 const contains = (parent, child) => {
     const rel = relative(parent, child);
@@ -96,6 +103,14 @@ check(
 
 const mcpStray = Object.keys(mcp).filter((k) => k !== "$schema" && k !== "mcpServers");
 check("mcp.json has no keys outside $schema/mcpServers", mcpStray.length === 0, mcpStray.join(", "));
+
+// One server: a second server (or the old split into an API and a docs server)
+// doubles the tool definitions every session loads.
+check(
+    "mcp.json declares exactly one MCP server",
+    Object.keys(mcp.mcpServers ?? {}).length === 1,
+    Object.keys(mcp.mcpServers ?? {}).join(", "),
+);
 
 for (const [serverName, server] of Object.entries(mcp.mcpServers ?? {})) {
     const allowed = SERVER_KEYS[server.type];
@@ -172,6 +187,22 @@ if (existsSync(skillsDir)) {
         check(`skills/${skill} frontmatter name matches the spec regex`, NAME_RE.test(nameField ?? ""), nameField);
         check(`skills/${skill} has a description`, Boolean(descField));
         check(`skills/${skill} description is <= 1024 chars`, (descField ?? "").length <= 1024);
+
+        // SKILL.md is an index that loads with the skill, so it stays short;
+        // detail lives in references/ and loads only when a task needs it.
+        const lines = lineCount(body);
+        check(`skills/${skill}/SKILL.md is <= ${SKILL_MD_MAX_LINES} lines`, lines <= SKILL_MD_MAX_LINES, `${lines} lines`);
+
+        const refDir = join(skillPath, "references");
+        for (const ref of existsSync(refDir) ? readdirSync(refDir).filter((f) => f.endsWith(".md")) : []) {
+            const refBody = readFileSync(join(refDir, ref), "utf8");
+            if (lineCount(refBody) <= REFERENCE_TOC_THRESHOLD) continue;
+            // A partial read of a long reference must still see its map.
+            check(
+                `skills/${skill}/references/${ref} (over ${REFERENCE_TOC_THRESHOLD} lines) starts with a contents list`,
+                refBody.match(/^## .*$/m)?.[0].trim() === "## Contents",
+            );
+        }
     }
 
     // Immediate children only: a nested SKILL.md is never discovered by clients.
@@ -396,6 +427,23 @@ if (!canonicalTransports.has("sse")) {
         );
     }
 }
+
+/**
+ * The two servers of 0.7.x were merged into `dodopayments` in 0.8.0. Their names
+ * must not come back through a hand edit or a stale generator: a client that
+ * registers both would load two tool sets and two docs searches again.
+ */
+const OLD_SERVER_NAMES = /dodopayments-api|dodo-knowledge|knowledge\.dodopayments\.com/;
+for (const rel of [
+    "mcp.json", ".mcp.json", "gemini-extension.json", ".muse-plugin/plugin.json",
+    "plugins/dodopayments/mcp.json", "plugins/dodopayments/.mcp.json", "plugins/dodopayments/.muse-plugin/plugin.json",
+    "providers/antigravity/mcp_config.json", "providers/junie/mcp/.mcp.json",
+]) {
+    const hit = readFileSync(join(ROOT, rel), "utf8").match(OLD_SERVER_NAMES);
+    check(`${rel} does not register the removed 0.7.x servers`, !hit, hit?.[0]);
+}
+const registeredHit = JSON.stringify(registered.mcp ?? {}).match(OLD_SERVER_NAMES);
+check("opencode-plugin does not register the removed 0.7.x servers", !registeredHit, registeredHit?.[0]);
 
 check("no leftover skills-src submodule", !existsSync(join(ROOT, ".gitmodules")));
 

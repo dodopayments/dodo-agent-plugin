@@ -1,5 +1,5 @@
 // @dodopayments/opencode-plugin
-// Registers Dodo Payments MCP servers via OpenCode's `config` hook.
+// Registers the Dodo Payments MCP server via OpenCode's `config` hook.
 // @see https://opencode.ai/docs/plugins
 
 /**
@@ -9,8 +9,8 @@
 // This module must export NOTHING but the default function. OpenCode's loader
 // falls through to `getLegacyPlugins(mod)`, which iterates `Object.values(mod)`
 // and throws `Plugin export is not a function` on any non-function export. The
-// failure is swallowed: the plugin is skipped entirely and the MCP servers
-// below silently vanish. Verified on 1.18.15 - adding a single named object
+// failure is swallowed: the plugin is skipped entirely and the MCP server
+// below silently vanishes. Verified on 1.18.15 - adding a single named object
 // export drops both servers.
 //
 // To re-verify that claim, overwrite the module inside OpenCode's own package
@@ -28,32 +28,29 @@
 // Nullish-assign (`??=`) lets users override any entry by declaring the
 // same MCP key in their own opencode.json.
 //
-// The endpoint URLs below MUST match the canonical mcp.json. This file is
+// The endpoint URL below MUST match the canonical mcp.json. This file is
 // hand-written rather than generated - OpenCode's config shape is its own
 // (`type: "remote"`, `url`) - so `build.mjs --check` cannot cover
 // it. `scripts/conformance.mjs` asserts the URL sets are identical instead.
 // `type: "remote"` is OpenCode's native Streamable HTTP transport; OpenCode
-// runs OAuth discovery itself. Verified on 1.18.34 from a project-level
-// opencode.json with these exact entries: dodo-knowledge connects, and
-// dodopayments-api reports "needs authentication" (`opencode mcp auth`).
+// runs OAuth discovery itself when connecting returns 401 (`opencode mcp auth
+// dodopayments`). It does not start OAuth after a 401 in the middle of a
+// session (verified on 1.18.34), which is why the server requires sign-in at
+// connect time.
 const DODO_MCP_SERVERS = {
-    "dodopayments-api": {
+    dodopayments: {
         type: "remote",
         url: "https://mcp.dodopayments.com/mcp",
-        enabled: true,
-    },
-    "dodo-knowledge": {
-        type: "remote",
-        url: "https://knowledge.dodopayments.com/mcp",
         enabled: true,
     },
 };
 
 // Env vars chosen over opencode.json config because OpenCode's top-level
 // schema is strict and rejects unknown keys (anomalyco/opencode#9161).
+// DODO_DISABLE_KNOWLEDGE_MCP is still accepted and does nothing: the docs
+// server it used to turn off is no longer registered.
 const DISABLE_FLAGS = {
-    "dodopayments-api": "DODO_DISABLE_API_MCP",
-    "dodo-knowledge": "DODO_DISABLE_KNOWLEDGE_MCP",
+    dodopayments: "DODO_DISABLE_API_MCP",
 };
 
 const TRUTHY = new Set(["1", "true", "yes", "on"]);

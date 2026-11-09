@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.8.0 - 2026-11-09
+
+One MCP server and one skill. Before this release the 18 skill descriptions (about 1.6k tokens) and two servers' tool lists loaded into every session. Now a session loads one short skill description and one tool list.
+
+### Changed
+
+- **One MCP server, `dodopayments`**, at `https://mcp.dodopayments.com/mcp` (Streamable HTTP). It replaces `dodopayments-api` (same URL) and `dodo-knowledge`. Tools: `search_docs` (guide search), `read_docs_page` (a docs page as markdown), `search` (SDK and API method search), `execute` (runs TypeScript SDK code against the signed-in account, in a sandbox) and `feedback` (sends a note to Dodo, with emails, IDs and keys removed first). Server change: [dodopayments/dodopayments-typescript#418](https://github.com/dodopayments/dodopayments-typescript/pull/418) and [#419](https://github.com/dodopayments/dodopayments-typescript/pull/419).
+- **One skill, `dodo-payments`**: a `SKILL.md` index of about 130 lines plus 17 reference files loaded on demand (checkout, mobile-checkout, subscriptions, webhooks, usage-billing, credits, license-keys, products, discounts, localized-pricing, customers, refunds-disputes, framework-adapters, better-auth, billing-sdk, testing-go-live, mcp). Source: `dodo-payments/dodo-payments` in [dodopayments/skills](https://github.com/dodopayments/skills), merged in [#42](https://github.com/dodopayments/skills/pull/42) and [#44](https://github.com/dodopayments/skills/pull/44).
+- **Sign-in starts when the server is added or connected.** The server returns 401 until the client signs in: `/mcp` in Claude Code, `codex mcp login dodopayments`, `opencode mcp auth dodopayments`, `muse mcp login dodopayments`, `devin mcp login dodopayments`, or `/mcp` in Antigravity and Junie.
+- Clients that cannot sign in (grok.com custom connectors, the xAI Responses API, similar connectors) can use `https://mcp.dodopayments.com/mcp?auth=optional`. Then `search_docs`, `read_docs_page`, `search` and `feedback` work without an account and `execute` returns 401.
+- `DODO_DISABLE_API_MCP=1` skips registering `dodopayments` in the OpenCode plugin.
+
+### Removed
+
+- The plugin no longer registers `dodopayments-api` or `dodo-knowledge`. `knowledge.dodopayments.com/mcp` still exists as a docs-only server with no account, but is not part of the plugin.
+- The 18 skills: `dodo-best-practices`, `dodo-mcp-usage`, `framework-adapters`, `testing-and-go-live`, `checkout-integration`, `subscription-integration`, `mobile-checkout`, `webhook-integration`, `credit-based-billing`, `usage-based-billing`, `license-keys`, `product-catalog-management`, `discounts-and-promotions`, `localized-pricing`, `customer-management`, `refunds-and-disputes`, `billing-sdk`, `better-auth-integration`.
+- `DODO_DISABLE_KNOWLEDGE_MCP` is still accepted and does nothing.
+
+### Migration
+
+- The rename from `dodopayments-api` to `dodopayments` makes some clients ask you to sign in again. Use the commands above. Revoke old access in the dashboard under **Settings > Connected Apps**.
+- If you added `dodo-knowledge` by hand, remove it, or you get duplicate docs results.
+- If you disabled `dodopayments-api` in your own config, rename that key to `dodopayments`.
+
 ## 0.7.0 - 2026-11-02
 
 The API MCP server now signs in through the Dodo Payments authorization server at `auth.dodopayments.com`. The endpoint (`https://mcp.dodopayments.com/mcp`) and every client MCP config stay the same.
