@@ -15,15 +15,14 @@ agy plugin install ./dodo-agent-plugin/providers/antigravity
 
 To update, `git pull` and run the install command again.
 
-Antigravity handles OAuth automatically for the API server the first time a tool is called.
+Antigravity starts the OAuth sign-in for `dodopayments` when the server is connected.
 
-MCP servers only — add to `~/.gemini/config/mcp_config.json` (or `.agents/mcp_config.json` in a project):
+MCP server only — add to `~/.gemini/config/mcp_config.json` (or `.agents/mcp_config.json` in a project):
 
 ```json
 {
     "mcpServers": {
-        "dodopayments-api": { "serverUrl": "https://mcp.dodopayments.com/mcp" },
-        "dodo-knowledge": { "serverUrl": "https://knowledge.dodopayments.com/mcp" }
+        "dodopayments": { "serverUrl": "https://mcp.dodopayments.com/mcp" }
     }
 }
 ```
@@ -38,15 +37,14 @@ Junie also reads Claude-style marketplaces, so the quickest install is:
 
 1. In Junie, run `/extensions` → **Add marketplace** → `https://github.com/dodopayments/dodo-agent-plugin`.
 2. Install **dodopayments**.
-3. Run `/mcp` and authorize `dodopayments-api`.
+3. Run `/mcp` and authorize `dodopayments`.
 
-MCP servers only — add to `.junie/mcp/mcp.json` (project) or `~/.junie/mcp/mcp.json` (user):
+MCP server only — add to `.junie/mcp/mcp.json` (project) or `~/.junie/mcp/mcp.json` (user):
 
 ```json
 {
     "mcpServers": {
-        "dodopayments-api": { "url": "https://mcp.dodopayments.com/mcp" },
-        "dodo-knowledge": { "url": "https://knowledge.dodopayments.com/mcp" }
+        "dodopayments": { "url": "https://mcp.dodopayments.com/mcp" }
     }
 }
 ```

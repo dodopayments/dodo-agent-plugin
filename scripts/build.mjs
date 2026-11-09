@@ -54,9 +54,8 @@ const overlays = {
 
 const { version, name, author, homepage, repository, license } = plugin;
 
-/** Declared skill set; the single source for every count and skill list emitted below. */
+/** Declared skill set; the single source for every skill list emitted below. */
 const skillNames = read(".skills-source.json").skills;
-const skillCount = skillNames.length;
 
 /**
  * Codex UI metadata lives in the spec's extension namespace. Fail loudly rather
@@ -97,9 +96,9 @@ const keywordsFor = (tag) => {
  * - Remote transports are spelled `"type": "http"`, the name the Claude-style
  *   `.mcp.json` dialect uses for Streamable HTTP. The spec's `streamable-http`
  *   is not understood there. Verified on Claude Code 2.1.282 and cursor-agent
- *   2026.08.04: `dodo-knowledge` connects natively and `dodopayments-api`
- *   reports "needs authentication" (OAuth discovery), so the `npx mcp-remote`
- *   bridge - and its Node dependency - is no longer needed.
+ *   2026.08.04: the server reports "needs authentication" (OAuth discovery)
+ *   when connecting returns 401, so the `npx mcp-remote` bridge - and its Node
+ *   dependency - is no longer needed.
  */
 const legacyRemote = (server) =>
     server.type === "stdio" ? server : { type: "http", url: server.url };
@@ -123,7 +122,7 @@ function legacyMcpConfig() {
 function codexManifest() {
     return {
         ...portableBase(),
-        description: "Dodo Payments tools for Codex: integration skills + API/docs MCP servers.",
+        description: "Dodo Payments tools for Codex: the dodo-payments integration skill and the Dodo Payments MCP server.",
         keywords: keywordsFor("codex"),
         skills: "./skills/",
         mcpServers: "./.mcp.json",
@@ -145,7 +144,7 @@ function museManifest() {
         name,
         displayName: codexInterface().displayName,
         version,
-        description: `Dodo Payments for Muse Code: ${skillCount} integration agent skills plus the Dodo Payments API and documentation MCP servers.`,
+        description: providerDescription("Muse Code"),
         author: { name: author.name, email: author.email },
         compat: { source: "native", manifestDir: ".muse-plugin" },
         capabilities: {
@@ -171,7 +170,7 @@ const JUNIE = "providers/junie";
 const remoteServers = () => Object.entries(mcp.mcpServers).filter(([, server]) => server.type !== "stdio");
 
 const providerDescription = (client) =>
-    `Dodo Payments for ${client}: ${skillCount} integration agent skills plus the Dodo Payments API and documentation MCP servers.`;
+    `Dodo Payments for ${client}: the dodo-payments integration agent skill and the Dodo Payments MCP server.`;
 
 const artifacts = {
     // ---- Meta Muse Code ----------------------------------------------------
@@ -208,7 +207,7 @@ const artifacts = {
     // ---- Claude Code -------------------------------------------------------
     ".claude-plugin/plugin.json": {
         ...portableBase(),
-        description: "Dodo Payments tools for Claude Code, including integration agent skills and the Dodo Payments API and docs MCP servers.",
+        description: "Dodo Payments tools for Claude Code: the dodo-payments integration skill and the Dodo Payments MCP server.",
         keywords: keywordsFor("claude-code"),
         ...overlays.claude,
     },
@@ -225,7 +224,7 @@ const artifacts = {
                 name,
                 source: "./",
                 description:
-                    "Dodo Payments tools for Claude Code, including integration agent skills and the Dodo Payments API and docs MCP servers.",
+                    "Dodo Payments tools for Claude Code: the dodo-payments integration skill and the Dodo Payments MCP server.",
                 author: { name: author.name, email: author.email },
                 homepage,
                 repository,
@@ -240,7 +239,7 @@ const artifacts = {
     // Cursor is confirmed to auto-detect the root Agent Plugins manifest.
     ".cursor-plugin/plugin.json": {
         ...portableBase(),
-        description: "Dodo Payments tools for Cursor: integration skills + API/docs MCP servers.",
+        description: "Dodo Payments tools for Cursor: the dodo-payments integration skill and the Dodo Payments MCP server.",
         keywords: keywordsFor("cursor"),
         ...overlays.cursor,
     },
@@ -273,7 +272,7 @@ const artifacts = {
     "gemini-extension.json": {
         name,
         version,
-        description: `Dodo Payments for Gemini CLI: ${skillCount} integration agent skills plus the Dodo Payments API and documentation MCP servers.`,
+        description: providerDescription("Gemini CLI"),
         mcpServers: Object.fromEntries(
             Object.entries(mcp.mcpServers).map(([serverName, server]) => [
                 serverName,

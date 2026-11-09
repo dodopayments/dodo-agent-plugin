@@ -4,8 +4,8 @@
 |---|---|---|
 | Grok Build (`grok` CLI) | Yes | Yes (OAuth) |
 | Grok Bot | Via the Cursor plugin marketplace it shares with Cursor | Inherits your Cursor team MCP policy |
-| grok.com / Grok apps | No | Yes, as a custom connector |
-| xAI API (Responses API) | No | `dodo-knowledge` (no auth); the API server needs OAuth, which the xAI API does not broker |
+| grok.com / Grok apps | No | Yes, as a custom connector (use `?auth=optional`) |
+| xAI API (Responses API) | No | Only with `?auth=optional` (docs tools, no account); `execute` needs OAuth, which the xAI API does not broker |
 
 ## Grok Build
 
@@ -20,23 +20,19 @@ Plugins are disabled and untrusted until you pass `--trust` (or trust them from 
 
 If you already added this marketplace in Claude Code, Grok Build discovers it automatically.
 
-The API server signs in through your browser the first time a tool is called; tokens are stored in `~/.grok/mcp_credentials.json`.
+The server signs in through your browser when it is connected; tokens are stored in `~/.grok/mcp_credentials.json`.
 
-### MCP servers only
+### MCP server only
 
 ```bash
-grok mcp add --transport http dodopayments-api https://mcp.dodopayments.com/mcp
-grok mcp add --transport http dodo-knowledge  https://knowledge.dodopayments.com/mcp
+grok mcp add --transport http dodopayments https://mcp.dodopayments.com/mcp
 ```
 
 Or in `~/.grok/config.toml` (user) / `.grok/config.toml` (project):
 
 ```toml
-[mcp_servers.dodopayments-api]
+[mcp_servers.dodopayments]
 url = "https://mcp.dodopayments.com/mcp"
-
-[mcp_servers.dodo-knowledge]
-url = "https://knowledge.dodopayments.com/mcp"
 ```
 
 ### Skills only
@@ -47,7 +43,7 @@ Grok Build also scans `.agents/skills/`, `.claude/skills/`, and `.grok/skills/`,
 
 1. Open **grok.com/connectors → New Connector → Custom**.
 2. Paste `https://mcp.dodopayments.com/mcp` and complete the sign-in.
-3. Repeat with `https://knowledge.dodopayments.com/mcp` (no sign-in needed).
+3. If the connector cannot sign in, paste `https://mcp.dodopayments.com/mcp?auth=optional` instead. Docs search works without an account; `execute` returns 401. (`https://knowledge.dodopayments.com/mcp` is a docs-only server with no account, if you prefer that.)
 
 On **Grok Business / Enterprise**, an admin adds the connector first at **console.x.ai → Grok Business → Connectors → Add Connector → Other**; each member then connects their own account.
 
@@ -60,8 +56,8 @@ On **Grok Business / Enterprise**, an admin adds the connector first at **consol
     "tools": [
         {
             "type": "mcp",
-            "server_url": "https://knowledge.dodopayments.com/mcp",
-            "server_label": "dodo_knowledge"
+            "server_url": "https://mcp.dodopayments.com/mcp?auth=optional",
+            "server_label": "dodopayments"
         }
     ]
 }

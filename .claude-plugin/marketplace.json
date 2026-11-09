@@ -6,13 +6,13 @@
     },
     "metadata": {
         "description": "Dodo Payments plugin marketplace for Claude Code.",
-        "version": "0.7.0"
+        "version": "0.8.0"
     },
     "plugins": [
         {
             "name": "dodopayments",
             "source": "./",
-            "description": "Dodo Payments tools for Claude Code, including integration agent skills and the Dodo Payments API and docs MCP servers.",
+            "description": "Dodo Payments tools for Claude Code: the dodo-payments integration skill and the Dodo Payments MCP server.",
             "author": {
                 "name": "Dodo Payments",
                 "email": "support@dodopayments.com"

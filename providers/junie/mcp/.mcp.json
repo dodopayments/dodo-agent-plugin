@@ -1,10 +1,7 @@
 {
     "mcpServers": {
-        "dodopayments-api": {
+        "dodopayments": {
             "url": "https://mcp.dodopayments.com/mcp"
-        },
-        "dodo-knowledge": {
-            "url": "https://knowledge.dodopayments.com/mcp"
         }
     }
 }
