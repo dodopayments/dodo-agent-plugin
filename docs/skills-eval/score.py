@@ -1,4 +1,4 @@
-"""Scores each run: agent usage from events.jsonl, static checks on the code, typecheck result from Coder."""
+"""Scores each run: agent usage from events.jsonl, static checks on the code, typecheck result written by run.sh."""
 import json, os, re, glob
 
 EVENTS = json.load(open('webhook-events.json'))  # valid event names, taken from the installed SDK

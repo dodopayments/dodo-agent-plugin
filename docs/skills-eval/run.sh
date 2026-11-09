@@ -15,6 +15,8 @@ for d in runs/*/; do
     XDG_CONFIG_HOME="$CLEAN" OPENCODE_DISABLE_CLAUDE_CODE=1 OPENCODE_DISABLE_EXTERNAL_SKILLS=1 \
       opencode run --auto -m "$MODEL" --format json --title "bench $id" "$prompt" > events.jsonl 2> stderr.txt
     echo $(( $(date +%s) - start )) > seconds.txt
+    # Build check read by score.py: PASS, or the tsc output.
+    if out=$(npx tsc --noEmit 2>&1); then echo PASS > typecheck.txt; else printf '%s\n' "$out" > typecheck.txt; fi
   ) &
 done
 wait

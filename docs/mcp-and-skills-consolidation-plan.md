@@ -207,7 +207,7 @@ Content changes:
      - tokens per response;
      - p50 and p95 latency.
    - Choose the backend with the best hit rate that stays within the 2k-token cap.
-   - **First run, 2026-11-09:** see "Search evaluation results" below. Result: combine both backends, after fixing the problems found in `dodo-knowledge`.
+   - **First run, 2026-11-09:** see "Search evaluation results" below. The first result favoured combining both backends. After the `dodo-knowledge` fixes, `dodo-knowledge` alone scored as well, so it is the default and the combined backend is the fallback.
 2. **Skills: about 10 integration tasks in fresh projects.** Examples:
    - Next.js checkout plus webhook;
    - an Express subscription with a plan change;
@@ -273,14 +273,14 @@ Same 30 questions, against prod (`raw-after.json`, `results-after.json`):
 - The only miss left is "cancel subscription at end of billing period", which is likely a docs gap (see above).
 - `dodo-knowledge` alone now matches the combined backend on top-3 and beats it on MRR, at about two thirds of the tokens. Mintlify's extra hits came from pages that `dodo-knowledge` used to fill with repeats. Workstream A should start with `dodo-knowledge` alone and add Mintlify only if the next question set, drawn from support tickets, shows a gap.
 
-Decision for workstream A:
+Decision for workstream A (updated after the re-run):
 
-- **Backend.** `search_docs` uses both backends combined, called in parallel through the service binding. Each result is capped at about 400 tokens, and the response at 5 results and 2k tokens.
-- **Fixes to `dodo-knowledge`, made before the merge:**
-  - remove repeated pages from the results;
-  - index the MDX pages in `api-reference/`;
-  - give docs pages more weight than GitHub READMEs.
-- **Then re-run** this evaluation, plus 30 new questions drawn from support tickets, so we don't tune to this question set.
+- **Backend.** `search_docs` uses `dodo-knowledge` alone, through the service binding. The response is capped at 5 results and 2k tokens. The combined backend (Mintlify called in parallel, each result capped at about 400 tokens) is the fallback, and is built only if the support-ticket question set below shows a gap that Mintlify covers.
+- **Fixes to `dodo-knowledge`:**
+  - remove repeated pages from the results (done, context-mcp#124);
+  - index the MDX pages in `api-reference/` (done, context-mcp#124);
+  - give docs pages more weight than GitHub READMEs (still to do, before the merge).
+- **Then re-run** this evaluation, plus 30 new questions drawn from support tickets, so we don't tune to this question set. That run decides whether the combined fallback is needed.
 
 Limits of this run:
 
