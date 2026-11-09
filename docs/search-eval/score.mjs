@@ -1,5 +1,6 @@
 // Scores the raw responses: top-1/top-3 hit rate, MRR@5, tokens per response and latency.
 import fs from 'node:fs';
+import path from 'node:path';
 
 const questions = JSON.parse(fs.readFileSync('questions.json', 'utf8'));
 const rawPath = process.argv[2] ?? 'raw.json';
@@ -87,4 +88,10 @@ for (const r of misses) {
   console.log(`\nQ${r.id} ${r.q}`);
   for (const v of ['knowledge', 'mintlify', 'hybrid']) console.log(`  ${v.padEnd(9)} rank=${r[v].rank || '-'} ${r[v].top3.join(', ')}`);
 }
-fs.writeFileSync(rawPath.replace(/^raw/, 'results'), JSON.stringify({ summary, perQ }, null, 1));
+// raw.json -> results.json, raw-after.json -> results-after.json, x.json -> x.results.json; never the input.
+const base = path.basename(rawPath);
+const outName = base.startsWith('raw') ? base.replace(/^raw/, 'results') : base.replace(/\.json$/, '') + '.results.json';
+const outPath = path.join(path.dirname(rawPath), outName);
+if (path.resolve(outPath) === path.resolve(rawPath)) throw new Error(`refusing to overwrite input ${rawPath}`);
+fs.writeFileSync(outPath, JSON.stringify({ summary, perQ }, null, 1));
+console.error(`wrote ${outPath}`);
