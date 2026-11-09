@@ -24,20 +24,28 @@ for (const [name, s] of Object.entries(servers)) {
   await client.callTool({ name: s.tool, arguments: s.args('dodo payments') });
   for (const item of questions) {
     if (only && item.id !== only) continue;
-    const t0 = performance.now();
+    // One retry on a failed call; `attempts` records it and `ms` times the last attempt.
     let text = '';
     let error = null;
-    try {
-      const res = await client.callTool({ name: s.tool, arguments: s.args(item.q) });
-      text = (res.content ?? []).map((c) => c.text ?? '').join('\n');
-      if (res.isError) error = text.slice(0, 200);
-    } catch (e) {
-      error = String(e).slice(0, 200);
-    }
-    const ms = Math.round(performance.now() - t0);
-    out.push({ server: name, id: item.id, ms, error, text });
+    let ms = 0;
+    let attempts = 0;
+    do {
+      attempts++;
+      error = null;
+      const t0 = performance.now();
+      try {
+        const res = await client.callTool({ name: s.tool, arguments: s.args(item.q) });
+        text = (res.content ?? []).map((c) => c.text ?? '').join('\n');
+        if (res.isError) error = text.slice(0, 200);
+      } catch (e) {
+        error = String(e).slice(0, 200);
+      }
+      ms = Math.round(performance.now() - t0);
+    } while (error && attempts < 2);
+    out.push({ server: name, id: item.id, ms, attempts, error, text });
     process.stderr.write(`${name} q${item.id} ${ms}ms${error ? ' ERROR ' + error : ''}\n`);
   }
   await client.close();
 }
-fs.writeFileSync(only ? `raw-${only}.json` : 'raw.json', JSON.stringify(out, null, 1));
+// RAW_OUT sets the output file, so a later run can sit next to the baseline.
+fs.writeFileSync(only ? `raw-${only}.json` : process.env.RAW_OUT ?? 'raw.json', JSON.stringify(out, null, 1));

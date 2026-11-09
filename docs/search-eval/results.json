@@ -7,20 +7,22 @@
    "mrr5": "0.85",
    "tokensMedian": 1386,
    "tokensP95": 2136,
-   "msP50": 1253,
-   "msP95": 2630,
-   "resultsMedian": 5
+   "msP50": 1257,
+   "msP95": 2619,
+   "resultsMedian": 5,
+   "repeatResults": 73
   },
   "mintlify": {
    "top1": "20/30",
    "top3": "27/30",
    "top5": "29/30",
    "mrr5": "0.79",
-   "tokensMedian": 8403,
+   "tokensMedian": 8112,
    "tokensP95": 11750,
-   "msP50": 722,
-   "msP95": 1034,
-   "resultsMedian": 10
+   "msP50": 719,
+   "msP95": 2275,
+   "resultsMedian": 10,
+   "repeatResults": 0
   },
   "mintlify top-5": {
    "top1": "20/30",
@@ -29,9 +31,10 @@
    "mrr5": "0.79",
    "tokensMedian": 3114,
    "tokensP95": 6892,
-   "msP50": 722,
-   "msP95": 1034,
-   "resultsMedian": 5
+   "msP50": 719,
+   "msP95": 2275,
+   "resultsMedian": 5,
+   "repeatResults": 0
   },
   "hybrid": {
    "top1": "24/30",
@@ -40,9 +43,10 @@
    "mrr5": "0.87",
    "tokensMedian": 2276,
    "tokensP95": 6916,
-   "msP50": 1253,
-   "msP95": 2630,
-   "resultsMedian": 5
+   "msP50": 1280,
+   "msP95": 2705,
+   "resultsMedian": 5,
+   "repeatResults": 0
   }
  },
  "perQ": [
@@ -88,6 +92,8 @@
    "knowledge": {
     "rank": 1,
     "top3": [
+     "/developer-resources/subscription-upgrade-downgrade",
+     "/developer-resources/subscription-upgrade-downgrade",
      "/developer-resources/subscription-upgrade-downgrade"
     ]
    },
@@ -124,7 +130,7 @@
     "top3": [
      "/developer-resources/subscription-upgrade-downgrade",
      "/developer-resources/nextjs-adaptor",
-     "/developer-resources/nextjs-boilerplate"
+     "/developer-resources/nextjs-adaptor"
     ]
    },
    "mintlify": {
@@ -231,7 +237,8 @@
     "rank": 1,
     "top3": [
      "/features/credit-based-billing",
-     "/features/entitlements/introduction"
+     "/features/credit-based-billing",
+     "/features/credit-based-billing"
     ]
    },
    "mintlify": {
@@ -265,6 +272,8 @@
    "knowledge": {
     "rank": 1,
     "top3": [
+     "/features/license-keys",
+     "/features/license-keys",
      "/features/license-keys"
     ]
    },
@@ -301,7 +310,7 @@
     "top3": [
      "/developer-resources/raw-card-api",
      "/features/transactions/refunds",
-     "/api-reference/refunds/post-refunds"
+     "/features/transactions/refunds"
     ]
    },
    "mintlify": {
@@ -337,7 +346,7 @@
     "top3": [
      "/developer-resources/webhooks",
      "/https://github.com/dodopayments/dodo-adapters/blob/main/packages/betterauth/README",
-     "/developer-resources/webhooks/examples/cloudflare-example"
+     "/developer-resources/webhooks"
     ]
    },
    "mintlify": {
@@ -372,7 +381,8 @@
     "rank": 1,
     "top3": [
      "/developer-resources/overlay-checkout",
-     "/developer-resources/inline-checkout"
+     "/developer-resources/inline-checkout",
+     "/developer-resources/overlay-checkout"
     ]
    },
    "mintlify": {
@@ -407,8 +417,8 @@
     "rank": 1,
     "top3": [
      "/developer-resources/inline-checkout",
-     "/developer-resources/overlay-checkout",
-     "/features/single-page-checkout"
+     "/developer-resources/inline-checkout",
+     "/developer-resources/overlay-checkout"
     ]
    },
    "mintlify": {
@@ -442,6 +452,8 @@
    "knowledge": {
     "rank": 1,
     "top3": [
+     "/features/subscription",
+     "/features/subscription",
      "/features/subscription"
     ]
    },
@@ -513,8 +525,8 @@
     "rank": 1,
     "top3": [
      "/developer-resources/ondemand-subscriptions",
-     "/developer-resources/subscription-integration-guide",
-     "/features/subscription"
+     "/developer-resources/ondemand-subscriptions",
+     "/developer-resources/subscription-integration-guide"
     ]
    },
    "mintlify": {
@@ -550,7 +562,7 @@
     "top3": [
      "/features/recovery/subscription-dunning",
      "/features/recovery/payment-retries",
-     "/features/recovery/overview"
+     "/features/recovery/subscription-dunning"
     ]
    },
    "mintlify": {
@@ -622,7 +634,7 @@
     "top3": [
      "/miscellaneous/testing-process",
      "/features/payment-methods/cards",
-     "/features/payment-methods/india"
+     "/miscellaneous/testing-process"
     ]
    },
    "mintlify": {
@@ -656,6 +668,8 @@
    "knowledge": {
     "rank": 1,
     "top3": [
+     "/miscellaneous/test-mode-vs-live-mode",
+     "/miscellaneous/test-mode-vs-live-mode",
      "/miscellaneous/test-mode-vs-live-mode"
     ]
    },
@@ -691,7 +705,8 @@
     "rank": 1,
     "top3": [
      "/features/purchasing-power-parity",
-     "/https://dodopayments.com/distribution/purchasing-power-parity"
+     "/features/purchasing-power-parity",
+     "/features/purchasing-power-parity"
     ]
    },
    "mintlify": {
@@ -726,8 +741,8 @@
     "rank": 1,
     "top3": [
      "/features/localized-pricing",
-     "/features/products",
-     "/changelog/v1.106.0"
+     "/features/localized-pricing",
+     "/features/localized-pricing"
     ]
    },
    "mintlify": {
@@ -798,6 +813,7 @@
     "rank": 1,
     "top3": [
      "/developer-resources/better-auth-adaptor",
+     "/https://github.com/dodopayments/dodo-adapters/blob/main/packages/betterauth/README",
      "/https://github.com/dodopayments/dodo-adapters/blob/main/packages/betterauth/README"
     ]
    },
@@ -832,6 +848,7 @@
    "knowledge": {
     "rank": 1,
     "top3": [
+     "/developer-resources/sdks/react-native",
      "/developer-resources/sdks/react-native",
      "/developer-resources/mobile-integration"
     ]
@@ -868,6 +885,7 @@
     "rank": 0,
     "top3": [
      "/developer-resources/dodo-payments-sdks",
+     "/https://github.com/dodopayments/dodopayments-python/blob/main/README",
      "/https://github.com/dodopayments/dodopayments-python/blob/main/README"
     ]
    },
@@ -902,6 +920,8 @@
    "knowledge": {
     "rank": 1,
     "top3": [
+     "/features/addons",
+     "/features/addons",
      "/features/addons"
     ]
    },
@@ -937,7 +957,8 @@
     "rank": 1,
     "top3": [
      "/features/seat-based-billing",
-     "/features/hybrid-billing"
+     "/features/seat-based-billing",
+     "/features/seat-based-billing"
     ]
    },
    "mintlify": {
@@ -972,8 +993,8 @@
     "rank": 1,
     "top3": [
      "/developer-resources/webhooks/intents/dispute",
-     "/developer-resources/webhooks/intents/webhook-events-guide",
-     "/integrations/zapier"
+     "/developer-resources/webhooks/intents/dispute",
+     "/developer-resources/webhooks/intents/webhook-events-guide"
     ]
    },
    "mintlify": {
@@ -1043,6 +1064,8 @@
    "knowledge": {
     "rank": 1,
     "top3": [
+     "/developer-resources/ingestion-blueprints/llm",
+     "/developer-resources/ingestion-blueprints/llm",
      "/developer-resources/ingestion-blueprints/llm"
     ]
    },
@@ -1077,6 +1100,8 @@
    "knowledge": {
     "rank": 1,
     "top3": [
+     "/features/entitlements/github",
+     "/features/entitlements/github",
      "/features/entitlements/github"
     ]
    },

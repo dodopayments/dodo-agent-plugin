@@ -2,7 +2,8 @@
 import fs from 'node:fs';
 
 const questions = JSON.parse(fs.readFileSync('questions.json', 'utf8'));
-const raw = JSON.parse(fs.readFileSync('raw.json', 'utf8'));
+const rawPath = process.argv[2] ?? 'raw.json';
+const raw = JSON.parse(fs.readFileSync(rawPath, 'utf8'));
 const tok = (s) => Math.ceil(s.length / 4);
 const norm = (u) => '/' + u.replace(/^https:\/\/docs\.dodopayments\.com\/?/, '').replace(/^\//, '').split('#')[0].replace(/\.md$/, '').replace(/\/$/, '');
 
@@ -54,10 +55,11 @@ for (const q of questions) {
   };
   const row = { id: q.id, q: q.q };
   for (const [name, s] of Object.entries(sets)) {
-    const pages = uniquePages(s.bs);
-    const rank = pages.findIndex((p) => q.gold.includes(p)) + 1;
-    variants[name].push({ rank, tokens: s.tokens, ms: s.ms, results: s.bs.length });
-    row[name] = { rank, top3: pages.slice(0, 3) };
+    // Rank is the position in the returned order, so a repeated page still takes a slot.
+    const rank = s.bs.findIndex((b) => q.gold.includes(b.page)) + 1;
+    const repeats = s.bs.length - uniquePages(s.bs).length;
+    variants[name].push({ rank, tokens: s.tokens, ms: s.ms, results: s.bs.length, repeats });
+    row[name] = { rank, top3: s.bs.slice(0, 3).map((b) => b.page) };
   }
   perQ.push(row);
 }
@@ -76,6 +78,7 @@ for (const [name, rows] of Object.entries(variants)) {
     msP50: pct(rows.map((r) => r.ms), 0.5),
     msP95: pct(rows.map((r) => r.ms), 0.95),
     resultsMedian: pct(rows.map((r) => r.results), 0.5),
+    repeatResults: rows.reduce((a, r) => a + r.repeats, 0),
   };
 }
 console.table(summary);
@@ -84,4 +87,4 @@ for (const r of misses) {
   console.log(`\nQ${r.id} ${r.q}`);
   for (const v of ['knowledge', 'mintlify', 'hybrid']) console.log(`  ${v.padEnd(9)} rank=${r[v].rank || '-'} ${r[v].top3.join(', ')}`);
 }
-fs.writeFileSync('results.json', JSON.stringify({ summary, perQ }, null, 1));
+fs.writeFileSync(rawPath.replace(/^raw/, 'results'), JSON.stringify({ summary, perQ }, null, 1));

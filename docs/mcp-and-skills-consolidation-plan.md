@@ -229,7 +229,8 @@ Setup:
 - **Questions and correct pages:** 30 questions across 18 topics. For each one, the correct page or pages were taken from the docs index (`_llms/en/docs.txt`) before any search ran.
 - **Running the queries:** one MCP connection to each server, with a warm-up call first, run from India.
 - **Combined method:** simulated offline. It takes results from `dodo-knowledge` and Mintlify in turn, skips pages already taken, and keeps 5 results.
-- **Files:** questions, harness and raw scores are in [`search-eval/`](search-eval/). Run `node run.mjs && node score.mjs` to repeat it.
+- **Files:** questions, harness and the raw responses (`raw.json`) are in [`search-eval/`](search-eval/). `node score.mjs` re-scores this run. To make a new run, use `npm install && RAW_OUT=raw-new.json node run.mjs && node score.mjs raw-new.json`.
+- **Scoring:** rank is the position in the returned order, so repeated pages still take a slot. A run made later, with one retry per failed call, gave the same numbers.
 
 | Backend | Top-1 | Top-3 | MRR@5 | Tokens (median / p95) | Latency (p50 / p95) |
 |---|---|---|---|---|---|
