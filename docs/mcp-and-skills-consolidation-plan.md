@@ -1,6 +1,6 @@
 # Plan: one MCP server and one skill
 
-Status: draft for review. Owners: TBD.
+Status: shipped in plugin 0.8.0 on 2026-11-09. See "Status" at the end for what changed from this plan.
 
 ## Why
 
@@ -18,9 +18,9 @@ We checked the report against plugin v0.6.3, `dodopayments/skills` at 8ed38e7 an
 |---|---|
 | Number of MCP servers in the plugin | One: `mcp.dodopayments.com/mcp` |
 | Server name in the plugin | Rename `dodopayments-api` to `dodopayments` |
-| Docs without signing in | Yes. Docs tools work without sign-in. `execute` starts OAuth the first time an agent calls it |
+| Docs without signing in | Changed after phase 0: the server requires sign-in when the client connects. `?auth=optional` serves the docs tools without an account, for clients that cannot do OAuth |
 | Tool set | Same split as Polar: `search` (API and SDK methods), `search_docs` (guides), `read_docs_page`, `execute`, `feedback` |
-| Guide search backend | Chosen by evaluation (see the evaluation section): `dodo-knowledge` (Pinecone), Mintlify, or both combined |
+| Guide search backend | `dodo-knowledge` alone, chosen by evaluation (see "Search evaluation results") |
 | `knowledge.dodopayments.com` | Stays online. It becomes the backend behind the new server and a public docs-only address |
 | Copied from Polar | The `feedback` tool and a single MCP docs page |
 | Skills | One `dodo-payments` skill with an index SKILL.md and reference files, following Anthropic's skill authoring guidelines |
@@ -279,7 +279,7 @@ Decision for workstream A (updated after the re-run):
 - **Fixes to `dodo-knowledge`:**
   - remove repeated pages from the results (done, context-mcp#124);
   - index the MDX pages in `api-reference/` (done, context-mcp#124);
-  - give docs pages more weight than GitHub READMEs (still to do, before the merge).
+  - give docs pages more weight than GitHub READMEs (done, context-mcp#128: GitHub results score ×0.8 after rerank, set by `GITHUB_SCORE_FACTOR`. "Install the Python SDK" now ranks `/developer-resources/sdks/python` above the README. The 30-question run is unchanged: top-3 29/30, MRR 0.88).
 - **Then re-run** this evaluation, plus 30 new questions drawn from support tickets, so we don't tune to this question set. That run decides whether the combined fallback is needed.
 
 Limits of this run:
@@ -343,6 +343,40 @@ For phase 3:
 - Add Haiku, and run each cell 3 times.
 - Ship if it keeps these checks passing, keeps test mode, and has under 11k context at step 1, close to having no plugin.
 
+## Phase 0: client sign-in test (2026-11-09)
+
+Run against prod after #418 shipped the no-sign-in tier, with each client in a throwaway project and no stored Dodo token.
+
+| Client | Connects unsigned, lists 5 tools | Starts OAuth after `execute` returns 401 mid-session | Manual sign-in command |
+|---|---|---|---|
+| OpenCode 1.18.34 | Yes | **No.** The agent gets "Unauthorized" | **Broken.** `opencode mcp auth` printed "Authentication successful!" and stored no token; `opencode mcp debug` reported "200 OK, no auth required" |
+| cursor-agent 2026.08.04 | Yes | Not tested (not logged in to Cursor) | Same pattern: `mcp login` reported success at once |
+| Codex 0.159.3 | Yes | Not tested | Works: `codex mcp login` found auth.dodopayments.com through the resource metadata |
+| Claude Code 2.1.38 | Yes | Not tested (not logged in to a model) | Not tested |
+
+No client was seen to start OAuth after a 401 in the middle of a session, and two clients decide whether to sign in only from the connect response. This is the fallback case in "Order of work". dodopayments-typescript#419 (deployed the same day) requires sign-in at connect again, as Polar does, and keeps the no-sign-in tier behind `https://mcp.dodopayments.com/mcp?auth=optional` for clients that can't do OAuth (grok.com connectors, the xAI API). After the change, `opencode mcp auth dodopayments` opens the auth.dodopayments.com consent page.
+
+## Skills evaluation of 0.8.0 (2026-11-09)
+
+The baseline setup above, with a third arm: the single `dodo-payments` skill and the single `dodopayments` server. The server is reached at `?auth=optional`, so the agent sees the same five tools a signed-in user sees without a real account.
+
+| Task | Setup | Time | Steps | Context at step 1 | Cost | Skills loaded | MCP calls | Typecheck | Webhook verified (raw body) | Test mode |
+|---|---|---|---|---|---|---|---|---|---|---|
+| t1 | none | 154 s | 27 | 10.6k | $0.67 | – | 0 | pass | yes | yes |
+| t1 | 0.7 plugin | 153 s | 24 | 14.5k | $0.54 | 2 | 0 | pass | yes | yes |
+| t1 | **0.8 plugin** | 144 s | **20** | 12.5k | **$0.45** | dodo-payments | 2 × `search` | pass | yes | yes |
+| t2 | none | 258 s | 29 | 10.7k | $0.83 | – | 0 | pass | yes | yes |
+| t2 | 0.7 plugin | 145 s | 20 | 14.6k | $0.64 | 4 | 2 | pass | yes | yes |
+| t2 | **0.8 plugin** | 128 s | **15** | 12.6k | **$0.47** | dodo-payments | 3 × `search` | pass | yes | yes |
+| t3 | none | 51 s | 10 | 10.6k | $0.11 | – | 0 | pass | n/a | **no** |
+| t3 | 0.7 plugin | 93 s | 11 | 14.5k | $0.18 | 1 | 0 | pass | n/a | yes |
+| t3 | **0.8 plugin** | 91 s | 10 | 12.5k | $0.15 | dodo-payments | 1 × `search` | pass | n/a | yes |
+
+- **Every check passes**, and 0.8 keeps the test-mode gain on t3 that the 0.7 plugin had over no plugin. No run used an invalid event name.
+- **Cheaper on the larger tasks:** against 0.7, t1 costs 17% less and t2 26% less, with fewer steps. Each run loaded one skill instead of up to four.
+- **Context at step 1 fell by 2.0k tokens** (14.5k to 12.5k), but missed the target of under 11k. The remaining 1.9k over no plugin is the skill description plus the five tool definitions and the server instructions. The next cut is shorter tool descriptions on the server.
+- Same limits as the baseline: one run per cell, Sonnet only, static checks.
+
 ## Order of work
 
 | Phase | Work | Takes |
@@ -377,3 +411,23 @@ For phase 3:
 
 - Making the CLI usable by agents: flag-based checkout, subscription and usage commands, `--json`. This is a separate roadmap item.
 - `?readonly=true`, a telemetry opt-out, and a separate sandbox address. Possible later work.
+
+## Status
+
+Shipped on 2026-11-09:
+
+| Workstream | PRs |
+|---|---|
+| Search fixes | context-mcp#124 (one result per page, `api-reference/` pages), #128 (docs over READMEs); devops#3665 (reindex pin) |
+| A: MCP server | dodopayments-typescript#418 (five tools, service binding, `feedback`), #419 (sign-in at connect, `?auth=optional`); infra#927 (rate limit for unsigned `POST /mcp`, 120/min per IP) |
+| B: skills | skills#42 (one `dodo-payments` skill), #44 (sign-in wording), #45 (two example fixes) |
+| C: plugin | dodo-agent-plugin#30 (0.8.0) |
+| D: public docs | dodo-docs#723 (MCP page, agent skills, intro), #724 (sign-in wording) |
+
+Changed from the plan:
+
+- **Sign-in at connect**, not on the first `execute` (phase 0).
+- **No Mintlify** in `search_docs`: `dodo-knowledge` alone matched the combined backend after its fixes.
+- **Release 0.8.0**, not 0.7.0, which shipped the OAuth sign-in on 2026-11-02.
+- **Not done:** the second search question set from support tickets; the skills evaluation with Haiku and Opus and three runs per cell; phase 0 in Claude Code, Cursor (agent run), VS Code and Gemini CLI.
+

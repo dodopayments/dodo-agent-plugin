@@ -1,5 +1,30 @@
 [
  {
+  "run": "t1-new",
+  "seconds": 144,
+  "steps": 20,
+  "base_context_tokens": 12524,
+  "tokens_processed": 1055776,
+  "output_tokens": 8667,
+  "cost_usd": 0.45,
+  "skills": [
+   "dodo-payments"
+  ],
+  "mcp_calls": [
+   "dodopayments_search",
+   "dodopayments_search"
+  ],
+  "typecheck": "pass",
+  "typecheck_errors": 0,
+  "verifies_webhook": true,
+  "raw_body": true,
+  "test_mode": true,
+  "event_names": [
+   "payment.succeeded"
+  ],
+  "invalid_event_names": []
+ },
+ {
   "run": "t1-none",
   "seconds": 154,
   "steps": 27,
@@ -39,6 +64,35 @@
   "test_mode": true,
   "event_names": [
    "payment.succeeded"
+  ],
+  "invalid_event_names": []
+ },
+ {
+  "run": "t2-new",
+  "seconds": 128,
+  "steps": 15,
+  "base_context_tokens": 12578,
+  "tokens_processed": 982643,
+  "output_tokens": 7438,
+  "cost_usd": 0.47,
+  "skills": [
+   "dodo-payments"
+  ],
+  "mcp_calls": [
+   "dodopayments_search",
+   "dodopayments_search",
+   "dodopayments_search"
+  ],
+  "typecheck": "pass",
+  "typecheck_errors": 0,
+  "verifies_webhook": true,
+  "raw_body": true,
+  "test_mode": true,
+  "event_names": [
+   "subscription.active",
+   "subscription.cancelled",
+   "subscription.on_hold",
+   "subscription.renewed"
   ],
   "invalid_event_names": []
  },
@@ -94,6 +148,28 @@
    "subscription.on_hold",
    "subscription.renewed"
   ],
+  "invalid_event_names": []
+ },
+ {
+  "run": "t3-new",
+  "seconds": 91,
+  "steps": 10,
+  "base_context_tokens": 12528,
+  "tokens_processed": 212021,
+  "output_tokens": 4707,
+  "cost_usd": 0.149,
+  "skills": [
+   "dodo-payments"
+  ],
+  "mcp_calls": [
+   "dodopayments_search"
+  ],
+  "typecheck": "pass",
+  "typecheck_errors": 0,
+  "verifies_webhook": null,
+  "raw_body": null,
+  "test_mode": true,
+  "event_names": [],
   "invalid_event_names": []
  },
  {

@@ -3,7 +3,7 @@
     "repository": "https://github.com/dodopayments/skills",
     "branch": "main",
     "path": "dodo-payments",
-    "commit": "65776c71b8dcd3bfc4117cae76e67facc738146b",
+    "commit": "881a83a187f7b96622872d12720a8640c7814b94",
     "syncedAt": "2026-11-09",
     "transforms": [],
     "//skills": "Explicit expected skill set. scripts/conformance.mjs asserts skills/ matches this exactly, so an upstream addition or removal surfaces as a reviewable diff here instead of a silently changed count.",
